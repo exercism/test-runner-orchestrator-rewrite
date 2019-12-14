@@ -11,7 +11,7 @@ module Orchestrator
         submission.language,
         submission.exercise,
         submission.s3_uri,
-        submission.container_version || default_container_version
+        submission.container_version.presence || default_container_version
       )
     end
 

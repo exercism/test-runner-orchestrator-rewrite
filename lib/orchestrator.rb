@@ -7,6 +7,9 @@ require 'securerandom'
 require 'concurrent-ruby'
 require 'rest-client'
 
+require "ext/string"
+require "ext/nilclass"
+
 require "orchestrator/application"
 require "orchestrator/language_processor"
 require "orchestrator/platform_connection"
