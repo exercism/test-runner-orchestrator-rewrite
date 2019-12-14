@@ -38,6 +38,12 @@ module Minitest
       end
     end
 
+    def stub_test_runner!(times: 1)
+      rets = times.times.map { mock }
+      Orchestrator::TestRunner.expects(:new).times(times).returns(*rets)
+      times == 1 ? rets.first : rets
+    end
+
     def stub_language_processor_run!(times: 1)
       Orchestrator::LanguageProcessor.any_instance.expects(:run!).times(times)
     end
@@ -46,6 +52,10 @@ module Minitest
       rets = times.times.map { mock }
       Orchestrator::PlatformConnection.expects(:new).times(times).returns(*rets)
       times == 1 ? rets.first : rets
+    end
+
+    def stub_spi_client!
+      Orchestrator::SPIClient.stubs(:post_test_run)
     end
   end
 end

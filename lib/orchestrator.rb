@@ -11,11 +11,14 @@ require "ext/string"
 require "ext/nilclass"
 
 require "orchestrator/application"
+require "orchestrator/exceptions"
 require "orchestrator/language_processor"
 require "orchestrator/language_settings"
 require "orchestrator/platform_connection"
 require "orchestrator/queue"
+require "orchestrator/spi_client"
 require "orchestrator/submission"
+require "orchestrator/test_run"
 require "orchestrator/test_runner"
 
 module Orchestrator

@@ -41,8 +41,25 @@ module Orchestrator
       submission = queue.shift(language: language)
       return false unless submission
 
-      test_runner.process_submission(submission)
-      return true
+      test_submission!(submission)
+      true
+
+    end
+
+    def test_submission!(submission)
+      max_attempts = 40
+      backoff_ms = 50
+      num_attempts = 0
+
+      begin
+        num_attempts += 1
+        test_runner.process_submission(submission)
+      rescue NoWorkersAvailableError
+        if num_attempts < max_attempts
+          sleep(backoff_ms / 1000.0)
+          retry
+        end
+      end
     end
   end
 end

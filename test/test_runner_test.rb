@@ -3,6 +3,8 @@ require 'test_helper'
 module Orchestrator
   class TestRunnerTest < Minitest::Test
     def test_uses_submission_container_version
+      stub_spi_client!
+
       language = :ruby
       exercise = :bob
       uuid = "023949s9dads"
@@ -22,6 +24,8 @@ module Orchestrator
     end
 
     def test_uses_default_container_container_version
+      stub_spi_client!
+
       language = :ruby
       exercise = :bob
       uuid = "023949s9dads"
@@ -43,5 +47,61 @@ module Orchestrator
       test_runner.process_submission(submission_with_blank)
       test_runner.process_submission(submission_with_none)
     end
+
+    def test_raises_for_no_workers
+      data = JSON.parse({
+        status: { status_code: 503 }
+      }.to_json)
+
+      platform_connection = stub_platform_connection!
+      platform_connection.expects(:run_tests).returns(data)
+
+      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      assert_raises(NoWorkersAvailableError) do
+        runner.process_submission(Submission.new(:ruby, :bob, 123, "git..."))
+      end
+    end
+
+    def test_posts_for_200s
+      uuid = SecureRandom.uuid
+
+      data = JSON.parse({
+        status: { status_code: 200 }
+      }.to_json)
+
+      platform_connection = stub_platform_connection!
+      platform_connection.expects(:run_tests).returns(data)
+
+      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      SPIClient.expects(:post_test_run).with do |p1, p2|
+        p1 == uuid &&
+        p2.is_a?(TestRun) &&
+        p2.status_code == 200
+      end
+
+      runner.process_submission(Submission.new(:ruby, :bob, uuid, "git..."))
+    end
+
+    def test_posts_for_400s
+      uuid = SecureRandom.uuid
+
+      data = JSON.parse({
+        status: { status_code: 400 }
+      }.to_json)
+
+      platform_connection = stub_platform_connection!
+      platform_connection.expects(:run_tests).returns(data)
+
+      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      SPIClient.expects(:post_test_run).with do |p1, p2|
+        p1 == uuid &&
+        p2.is_a?(TestRun) &&
+        p2.status_code == 400
+      end
+
+      runner.process_submission(Submission.new(:ruby, :bob, uuid, "git..."))
+    end
+
+
   end
 end

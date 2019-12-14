@@ -3,7 +3,7 @@ require 'test_helper'
 module Orchestrator
   class LanguageProcessorTest < Minitest::Test
     def test_runs_and_exits
-      stub_platform_connection!
+      stub_test_runner!
 
       queue = mock
 
@@ -29,6 +29,7 @@ module Orchestrator
     end
 
     def test_runs_a_submission_correctly
+      stub_spi_client!
       language = :ruby
       exercise = :bob
       uuid = "023949s9dads"
@@ -51,7 +52,8 @@ module Orchestrator
     end
 
     def test_sleeps_if_queue_is_empty
-      stub_platform_connection!
+      stub_test_runner!
+
       queue = mock
       queue.expects(:shift).with(language: :ruby).returns(nil).at_least_once
 
@@ -59,6 +61,23 @@ module Orchestrator
         language_processor.expects(:sleep).with(0.1).at_least_once
         language_processor.run!
         sleep(0.1) # Sleep to let it happen
+      end
+    end
+
+    def test_no_worker_loop
+      stub_spi_client!
+
+      submission = mock
+
+      queue = mock
+      queue.stubs(shift: submission)
+
+      test_runner = stub_test_runner!
+      test_runner.expects(:process_submission).times(40).with(submission).raises(NoWorkersAvailableError)
+
+      with_language_processor(:ruby, mock, mock) do |language_processor|
+        language_processor.expects(:sleep).times(39).with(0.05)
+        language_processor.send(:test_submission!, submission)
       end
     end
   end
