@@ -7,11 +7,16 @@ module Orchestrator
     end
 
     def run!
-      Thread.new do 
+      Thread.new do
         loop do
-          process_next_submission
+          submission_found = process_next_submission!
 
-          sleep(CHECK_FREQUENCY_MS / 1000.0)
+          # If the queue is empty, then let's back off
+          # for the check_freqnency
+          sleep(CHECK_FREQUENCY_MS / 1000.0) unless submission_found
+
+          # Always check for this regardless of whether submission
+          # was found or not.
           break if exit_asap.value
         end
       end
@@ -32,11 +37,12 @@ module Orchestrator
       @exit_asap = Concurrent::AtomicBoolean.new(false)
     end
 
-    def process_next_submission
+    def process_next_submission!
       submission = queue.shift(language: language)
-      return unless submission
+      return false unless submission
 
       test_runner.process_submission(submission)
+      return true
     end
   end
 end

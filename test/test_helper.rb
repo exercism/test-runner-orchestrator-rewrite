@@ -28,6 +28,16 @@ module Minitest
     end
 =end
 
+    def with_language_processor(lang, queue, settings = mock, &block)
+      lp = Orchestrator::LanguageProcessor.new(:ruby, queue, settings)
+      begin
+        block.call(lp)
+      ensure
+        lp.exit!
+        sleep(0.1)
+      end
+    end
+
     def stub_language_processor_run!(times: 1)
       Orchestrator::LanguageProcessor.any_instance.expects(:run!).times(times)
     end
