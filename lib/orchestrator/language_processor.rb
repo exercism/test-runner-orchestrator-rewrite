@@ -9,7 +9,7 @@ module Orchestrator
     def run!
       Thread.new do 
         loop do
-          process_new_submission
+          process_next_submission
 
           sleep(CHECK_FREQUENCY_MS / 1000.0)
           break if exit_asap.value
@@ -32,11 +32,11 @@ module Orchestrator
       @exit_asap = Concurrent::AtomicBoolean.new(false)
     end
 
-    def process_new_submission
+    def process_next_submission
       submission = queue.shift(language: language)
       return unless submission
 
-      process_submission(submission)
+      test_runner.process_submission(submission)
     end
   end
 end

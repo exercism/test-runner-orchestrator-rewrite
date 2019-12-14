@@ -7,6 +7,12 @@ module Orchestrator
     end
 
     def process_submission(submission)
+      platform_connection.run_tests(
+        submission.language,
+        submission.exercise,
+        submission.s3_uri,
+        submission.container_version || default_container_version
+      )
     end
 
     private

@@ -15,6 +15,7 @@ require "orchestrator/submission"
 require "orchestrator/test_runner"
 
 module Orchestrator
-  def self.application
+  def self.env
+    @env ||= (ENV["ENV"] || "development")
   end
 end

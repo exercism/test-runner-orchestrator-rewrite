@@ -33,7 +33,9 @@ module Minitest
     end
 
     def stub_platform_connection!(times: 1)
-      Orchestrator::PlatformConnection.expects(:new).times(times)
+      rets = times.times.map { mock }
+      Orchestrator::PlatformConnection.expects(:new).times(times).returns(*rets)
+      times == 1 ? rets.first : rets
     end
   end
 end
