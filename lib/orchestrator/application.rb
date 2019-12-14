@@ -1,28 +1,32 @@
 module Orchestrator
   class Application
     def self.start!
-      @instance = new
-
-      # TODO - Retrieve languages from the SPI
-      languages = [:ruby, :javascript]
-    end
-
-    # TODO - This is itself immutable so I think
-    # it's threadsafe, although the things inside
-    # of it need thread accessing.
-    def self.instance
-      @instance
+      new.start!
     end
 
     def initialize
       @queue = Queue.new
+      @language_processors = Hash.new {|h,k|h[k] = []}
     end
 
-    def enqueue(submission)
+    def start!
+      # TODO - Retrieve languages from the SPI
+      add_language_processor(:ruby)
+      add_language_processor(:javascript)
+    end
+
+    def enqueue_submission(submission)
       queue.push(submission)
     end
-    
+
+    def add_language_processor(language)
+
+      # TODO - pass correct default container version
+      lp = LanguageProcessor.run!(language, queue, "git-...")
+      language_processors[language].push(lp)
+    end
+
     private
-    attr_reader :queue
+    attr_reader :queue, :language_processors
   end
 end

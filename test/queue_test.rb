@@ -1,7 +1,7 @@
 require 'test_helper'
 
 module Orchestrator
-  class QuqueTest < Minitest::Test
+  class QueueTest < Minitest::Test
     def test_enqueing_and_retrieving
       ruby_two_fer_1 = Submission.new(:ruby, :two_fer, 1)
       ruby_two_fer_2 = Submission.new(:ruby, :two_fer, 2)
@@ -21,6 +21,11 @@ module Orchestrator
       assert_equal ruby_two_fer_2, queue.shift(language: :ruby)
       assert_equal javascript_two_fer_1, queue.shift(language: :javascript)
       assert_equal ruby_two_fer_3, queue.shift(language: :ruby)
+    end
+
+    def test_retrieving_nothing
+      queue = Queue.new
+      assert_nil queue.shift(language: :ruby)
     end
   end
 end

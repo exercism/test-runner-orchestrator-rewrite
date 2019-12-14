@@ -1,16 +1,20 @@
 module Orchestrator
   class Queue
     def initialize
-      @submissions = []
+      @submissions = Concurrent::MVar.new(Array.new)
     end
 
     def push(submission)
-      submissions.push(submission)
+      submissions.borrow do |arr|
+        arr.push(submission)
+      end
     end
 
     def shift(language: )
-      idx = submissions.find_index {|s| s.language == language }
-      submissions.delete_at(idx)
+      submissions.borrow do |arr|
+        idx = arr.find_index {|s| s.language == language }
+        idx ? arr.delete_at(idx) : nil
+      end
     end
 
     private

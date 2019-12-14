@@ -15,7 +15,7 @@ class SubmissionsReceiverApp < Sinatra::Base
       params[:submission_uuid]
     )
     puts "Queuing #{submission_uuid.split("-").last}: #{submission_uuid}"
-    application.enqueue(submission)
+    application.enqueue_submission(submission)
 
     json received: :ok
   end
