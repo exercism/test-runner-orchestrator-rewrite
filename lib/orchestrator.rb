@@ -12,6 +12,7 @@ require "ext/nilclass"
 
 require "orchestrator/application"
 require "orchestrator/language_processor"
+require "orchestrator/language_settings"
 require "orchestrator/platform_connection"
 require "orchestrator/queue"
 require "orchestrator/submission"

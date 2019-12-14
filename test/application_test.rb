@@ -10,8 +10,14 @@ module Orchestrator
       assert_equal submission, application.send(:queue).shift(language: :ruby)
     end
 
+    # This whole test is horrible in terms of checking
+    # internals but it's also caught lots of integration
+    # errors between all the pieces so I'm ok with it for now.
     def test_add_language_processor_proxies
+      ruby_language_settings = mock
+
       application = Application.new
+      application.send(:language_settings)[:ruby] = ruby_language_settings
 
       stub_platform_connection!(times: 3)
       stub_language_processor_run!(times: 3)
@@ -22,8 +28,11 @@ module Orchestrator
 
       assert_equal 2, application.send(:language_processors)[:ruby].size
       assert_equal 1, application.send(:language_processors)[:javascript].size
-      assert_equal :ruby, application.send(:language_processors)[:ruby].first.send(:language)
-      assert_equal :javascript, application.send(:language_processors)[:javascript].first.send(:language)
+
+      ruby = application.send(:language_processors)[:ruby].first
+      assert_equal :ruby, ruby.send(:language)
+      assert_equal application.send(:queue), ruby.send(:queue)
+      assert_equal ruby_language_settings, ruby.send(:test_runner).send(:language_settings)
     end
   end
 end

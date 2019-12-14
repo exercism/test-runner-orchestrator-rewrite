@@ -25,10 +25,10 @@ module Orchestrator
     attr_reader :language, :queue, :test_runner
     attr_accessor :exit_asap
 
-    def initialize(language, queue, container_version)
+    def initialize(language, queue, language_settings)
       @language = language.to_sym
       @queue = queue
-      @test_runner = TestRunner.new(language, container_version)
+      @test_runner = TestRunner.new(language, language_settings)
       @exit_asap = Concurrent::AtomicBoolean.new(false)
     end
 

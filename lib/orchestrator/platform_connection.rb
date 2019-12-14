@@ -30,23 +30,68 @@ module Orchestrator
       socket
     end
 
-  def run_tests(track_slug, exercise_slug, s3_uri, container_version)
-    test_run_id = "test-#{Time.now.to_i}"
-    params = {
-      action: :test_solution,
-      id: test_run_id,
-      track_slug: track_slug,
-      exercise_slug: exercise_slug,
-      s3_uri: s3_uri,
-      container_version: container_version
-      # "b6ea39ccb2dd04e0b047b25c691b17d6e6b44cfb",
-      # container_version: "sha-122a036658c815c2024c604046692adc4c23d5c1",
-    }
-    timeout = Orchestrator::TRACKS[track_slug][:timeout]
-    params[:execution_timeout] = timeout / 1000
-    client_timeout = timeout + 2000
-    send_recv(params, client_timeout)
-  end
+    def run_tests(track_slug, exercise_slug, s3_uri, container_version, timeout_ms)
+      test_run_id = "test-#{Time.now.to_i}"
+      params = {
+        action: :test_solution,
+        id: test_run_id,
+        track_slug: track_slug,
+        exercise_slug: exercise_slug,
+        s3_uri: s3_uri,
+        container_version: container_version
+      }
+      params[:execution_timeout] = timeout_ms / 1000.0
+      client_timeout = timeout_ms + 2000
 
+      send_msg(params, client_timeout)
+    end
+
+    def send_msg(json, timeout_ms)
+      socket.linger = timeout_ms * 2
+      socket.rcvtimeo = timeout_ms
+
+      msg = ZMQ::Message.new
+      msg.push(ZMQ::Frame.new(json))
+
+      puts "Sending msg"
+      socket.send_message(msg)
+
+      # Get the response back from the runner
+      puts "Waiting for response"
+      recvd_msg = socket.recv_message
+
+      return {
+        "status" => {
+          "status_code" => 101,
+          "message" => "Client Timeout"
+        }
+      } if recvd_msg.nil?
+
+      response = recvd_msg.pop.data
+
+      return {
+        "status"=> {
+          "status_code" => 102,
+          "message" => "Missing response",
+          "error" => "Response was nil"
+        }
+      } if response.nil?
+
+
+      begin
+        JSON.parse(response)
+      rescue JSON::ParserError => e
+        puts e.message
+        puts e.backtrace
+
+        {
+          "status" => {
+            "status_code" => 103,
+            "message" => "Malformed response",
+            "error" => "Response was not valid JSON. Got #{response}"
+          }
+        }
+      end
+    end
   end
 end

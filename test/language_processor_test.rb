@@ -3,7 +3,6 @@ require 'test_helper'
 module Orchestrator
   class LanguageProcessorTest < Minitest::Test
     def test_runs_and_exits
-      skip
       stub_platform_connection!
 
       queue = mock
@@ -27,15 +26,18 @@ module Orchestrator
       exercise = :bob
       uuid = "023949s9dads"
       s3_uri = "s3://test-exercism-submissions/test/testing/#{uuid}"
-      container_version = "git-123asd"
       submission = Submission.new(language, exercise, uuid)
       queue = Queue.new
       queue.push(submission)
 
-      conn = stub_platform_connection!
-      conn.expects(:run_tests).with(language, exercise, s3_uri, container_version)
+      timeout = 2000
+      container_version = "git-123asd"
+      settings = LanguageSettings.new(:ruby, timeout, container_version)
 
-      languge_processor = LanguageProcessor.run!(language, queue, container_version)
+      conn = stub_platform_connection!
+      conn.expects(:run_tests).with(language, exercise, s3_uri, container_version, timeout)
+
+      languge_processor = LanguageProcessor.run!(language, queue, settings)
       sleep(0.1) # TODO - Ho do we get rid of this?
       languge_processor.exit!
     end
