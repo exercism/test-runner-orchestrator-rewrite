@@ -9,16 +9,15 @@ module Orchestrator
       container_slug = submission.container_slug.presence ||
                        language_settings.container_slug
 
-      TestRun.new(
-        submission.uuid,
-        platform_connection.run_tests(
-          submission.language,
-          submission.exercise,
-          submission.s3_uri,
-          container_slug,
-          language_settings.timeout_ms
-        )
+      data = platform_connection.run_tests(
+        submission.language,
+        submission.exercise,
+        submission.s3_uri,
+        container_slug,
+        language_settings.timeout_ms
       )
+
+      TestRun.new(submission.uuid, data)
     end
 
     private

@@ -29,10 +29,10 @@ module Orchestrator
           512
         end
 
-      JSON.parse({
-        status: { status_code: status_code },
-        response: {something: "here"}
-      }.to_json)
+      {
+        "status" => { "status_code" => status_code },
+        "response" => { "something" => "here" }
+      }
     end
   end
 end
