@@ -37,7 +37,7 @@ module Orchestrator
       queue.expects(:push).never
 
       test_runner = stub_test_runner!
-      test_runner.expects(:test!).returns(true)
+      test_runner.expects(:test!).returns([true, 999])
 
       with_language_processor(:ruby, queue, nil) do |language_processor|
         language_processor.run!
@@ -56,7 +56,7 @@ module Orchestrator
       queue.expects(:push).with(submission)
 
       test_runner = stub_test_runner!
-      test_runner.expects(:test!).returns(false)
+      test_runner.expects(:test!).returns([false, 999])
 
       with_language_processor(:ruby, queue, nil) do |language_processor|
         language_processor.run!

@@ -81,7 +81,7 @@ module Orchestrator
       @platform_connection.expects(:run_tests).with(:ruby, :bob, @s3_uri, @container_slug, @timeout).returns(@pc_data)
       Orchestrator::SPIClient.expects(:post_test_run).with(@uuid, 200, @message, @results)
 
-      assert TestRunner.new(@submission, @platform_connection, @settings).test!
+      assert_equal [true, 200], TestRunner.new(@submission, @platform_connection, @settings).test!
     end
 
     def test_works_with_400
@@ -90,7 +90,7 @@ module Orchestrator
       @platform_connection.expects(:run_tests).with(:ruby, :bob, @s3_uri, @container_slug, @timeout).returns(@pc_data)
       Orchestrator::SPIClient.expects(:post_test_run).with(@uuid, 400, @message, @results)
 
-      assert TestRunner.new(@submission, @platform_connection, @settings).test!
+      assert_equal [true, 400], TestRunner.new(@submission, @platform_connection, @settings).test!
     end
 
     def test_no_workers_loop
@@ -102,7 +102,7 @@ module Orchestrator
 
       test_runner = TestRunner.new(@submission, @platform_connection, @settings)
       test_runner.expects(:sleep).times(39).with(0.05)
-      refute test_runner.test!
+      assert_equal [false, 503], test_runner.test!
     end
 
     def test_no_workers_loop_with_threshold
@@ -115,7 +115,7 @@ module Orchestrator
 
       test_runner = TestRunner.new(@submission, @platform_connection, @settings)
       test_runner.expects(:sleep).times(39).with(0.05)
-      assert test_runner.test!
+      assert_equal [true, 503], test_runner.test!
     end
 
     def test_bad_exception_loop
@@ -126,7 +126,7 @@ module Orchestrator
       @platform_connection.expects(:run_tests).times(2).raises(RuntimeError)
 
       test_runner = TestRunner.new(@submission, @platform_connection, @settings)
-      refute test_runner.test!
+      assert_equal [false, 999], test_runner.test!
     end
 
     def test_bad_exception_loop_with_submission_error_threshold
@@ -138,7 +138,7 @@ module Orchestrator
       Orchestrator::SPIClient.expects(:post_unknown_error).with(@uuid, "RuntimeError")
 
       test_runner = TestRunner.new(@submission, @platform_connection, @settings)
-      assert test_runner.test!
+      assert_equal [true, 999], test_runner.test!
     end
   end
 end

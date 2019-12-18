@@ -18,6 +18,7 @@ module Orchestrator
 
     def scale_processors(new_count)
       processors_mvar.borrow do |processors|
+
         # Let's get this cached for sanity's sake
         current_count = processors.size
 

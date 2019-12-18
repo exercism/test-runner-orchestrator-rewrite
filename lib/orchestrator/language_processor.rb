@@ -44,8 +44,13 @@ module Orchestrator
       submission = queue.shift
       return false unless submission
 
-      handled = TestRunner.new(submission, platform_connection, settings).test!
+      handled, status = TestRunner.new(submission, platform_connection, settings).test!
       queue.push(submission) unless handled
+
+      # TODO - Add a monitor here that belongs to language
+      # which records the most recent statuses in order to
+      # alert us if something starts going wrong, and automatically
+      # reduce the number of processors, etc.
 
       true
     end

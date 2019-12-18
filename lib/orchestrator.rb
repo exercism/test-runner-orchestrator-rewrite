@@ -1,39 +1,38 @@
 ENV["APP_ENV"] ||= "development"
 
+require 'concurrent-ruby'
 require 'erb'
+require 'json'
 require "mandate"
 require 'rbczmq'
-require 'json'
-require 'yaml'
-require 'securerandom'
-require 'concurrent-ruby'
 require 'rest-client'
+require 'securerandom'
+require 'yaml'
 
-require "ext/string"
-require "ext/nilclass"
+require "ext/nil_class"
 require "ext/s3"
+require "ext/string"
 
-require "orchestrator/logger"
 require "orchestrator/application"
 require "orchestrator/exceptions"
 require "orchestrator/language"
 require "orchestrator/language_settings"
 require "orchestrator/language_processor"
+require "orchestrator/logger"
+require "orchestrator/platform_connection"
 require "orchestrator/queue"
 require "orchestrator/spi_client"
 require "orchestrator/submission"
 require "orchestrator/test_run"
 require "orchestrator/test_runner"
 
-%w{
-  platform_connection
-}.each do |lib|
-  lib = ENV["APP_ENV"] == "development" ? "orchestrator/stubs/#{lib}" :
-                                          "orchestrator/#{lib}"
-  require lib
-end
-
 require "orchestrator/http/app"
+
+# Stubbed methods to avoid having to work
+# with zmq locally. See files for details.
+if ENV["APP_ENV"] == "development"
+  require "orchestrator/stubs/platform_connection"
+end
 
 module Orchestrator
   def self.env

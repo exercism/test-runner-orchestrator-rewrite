@@ -8,6 +8,7 @@
 #   512 for :haskell (Other error)
 #
 # and always returns the same results hash.
+
 module Orchestrator
   class PlatformConnection
 

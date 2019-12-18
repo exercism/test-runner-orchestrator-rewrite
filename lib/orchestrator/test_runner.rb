@@ -19,7 +19,7 @@ module Orchestrator
       # going to change, then record it and exit successfully
       if test_run.ran_successfully? || test_run.permanent_error?
         test_run.post_to_spi!
-        return true
+        return [true, test_run.status_code]
       end
 
       # If there are no workers avaliable then let's retry
@@ -42,21 +42,22 @@ module Orchestrator
 
       # If we've failed too many times then post the result back
       if submission.errored_too_many_times?
-        Logger.log_submission(submission, "Too many errors. Giving up.")
+        log("Too many errors. Giving up.")
+
         test_run.post_to_spi!
-        return true
+        return [true, test_run.status_code]
       end
 
       # Otherwise we've not handled it here so pass it back
       # upstream to be requeued.
-      Logger.log_submission(submission, "Errored. Attempting to requeue.")
-      return false
+      log("Errored. Attempting to requeue.")
+      return [false, test_run.status_code]
     rescue => e
       return handle_bad_exception(e)
     end
 
     def generate_test_run!
-      Logger.log_submission(submission, "Starting testing #{submission.num_errored_test_runs + 1}/#{num_attempts + 1}")
+      log("Starting testing #{submission.num_errored_test_runs + 1}/#{num_attempts + 1}")
 
       container_slug = submission.container_slug.presence ||
                        language_settings.container_slug
@@ -70,7 +71,7 @@ module Orchestrator
       )
 
       TestRun.new(submission.uuid, data).tap do |test_run|
-        Logger.log_submission(submission, "Finished testing (#{test_run.status_code})")
+        log("Finished testing (#{test_run.status_code})")
       end
     end
 
@@ -90,11 +91,11 @@ module Orchestrator
     #
     # TODO - We should probably push this to bugsnag
     def handle_bad_exception(e)
-      Logger.log_submission(submission, "======")
-      Logger.log_submission(submission, "Exception while running tests (#{retry_unknown_error ? "first" : "second"} time)")
-      Logger.log_submission(submission, e.class.name)
-      Logger.log_submission(submission, e.message)
-      Logger.log_submission(submission, "------")
+      log("======")
+      log("Exception while running tests (#{retry_unknown_error ? "first" : "second"} time)")
+      log(e.class.name)
+      log(e.message)
+      log("------")
 
       if retry_unknown_error
         self.retry_unknown_error = false
@@ -102,7 +103,7 @@ module Orchestrator
       end
 
       submission.increment_errors!
-      return false unless submission.errored_too_many_times?
+      return [false, 999] unless submission.errored_too_many_times?
 
       # Ensure that we catch this error too, so that we don't
       # exit the whole processor.
@@ -111,15 +112,15 @@ module Orchestrator
       begin
         SPIClient.post_unknown_error(submission.uuid, e.message)
       rescue => e
-        Logger.log_submission(submission, "======")
-        Logger.log_submission(submission, "Exception when posting error to SPI")
-        Logger.log_submission(submission, e.class.name)
-        Logger.log_submission(submission, e.message)
-        Logger.log_submission(submission, "------")
+        log("======")
+        log("Exception when posting error to SPI")
+        log(e.class.name)
+        log(e.message)
+        log("------")
       end
 
       # At this stage, let's just get rid of the message
-      return true
+      return [true, 999]
     end
 
     private
@@ -127,5 +128,9 @@ module Orchestrator
 
     protected
     attr_accessor :num_attempts, :retry_unknown_error
+
+    def log(msg)
+      Logger.log_submission(submission, msg)
+    end
   end
 end
