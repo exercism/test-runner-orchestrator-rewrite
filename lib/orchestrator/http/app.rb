@@ -31,4 +31,8 @@ class SubmissionsReceiverApp < Sinatra::Base
       count: params[:count].to_i
     )
   end
+
+  get '/status' do
+    json Orchestrator.application.status
+  end
 end

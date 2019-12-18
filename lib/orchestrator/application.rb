@@ -78,6 +78,21 @@ module Orchestrator
       end
     end
 
+    def status
+      borrow_languages do |langs|
+        langs.each_with_object({}) do |(slug, lang), output|
+          output[slug] = {
+            num_processors: lang.num_processors,
+            queue_size: lang.queue_size,
+            settings: {
+              timeout_ms: lang.settings.timeout_ms,
+              container_version: lang.settings.container_version
+            }
+          }
+        end
+      end
+    end
+
     private
     attr_reader :languages
 

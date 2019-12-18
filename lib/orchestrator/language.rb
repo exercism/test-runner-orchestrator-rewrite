@@ -4,7 +4,7 @@
 # guarantees thread safety.
 module Orchestrator
   class Language
-    attr_reader :timeout_ms, :container_version
+    attr_reader :settings
 
     def initialize(settings_hash)
       @queue = Queue.new
@@ -49,6 +49,6 @@ module Orchestrator
     end
 
     private
-    attr_reader :queue, :processors_mvar, :settings
+    attr_reader :queue, :processors_mvar
   end
 end

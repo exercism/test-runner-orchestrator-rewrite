@@ -5,7 +5,8 @@ module Orchestrator
         secrets = YAML::load(
           ERB.new(
             File.read(
-              File.dirname(__FILE__) + "/../../config/secrets.yml")
+              File.dirname(__FILE__) + "/../../config/secrets.yml"
+            )
           ).result
         )[Orchestrator.env]
         secrets['aws_submissions_bucket']
