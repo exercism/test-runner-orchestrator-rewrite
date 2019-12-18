@@ -5,7 +5,7 @@ module Orchestrator
       @platform_connection = PlatformConnection.new
     end
 
-    def process_submission(submission)
+    def test_submission(submission)
       container_slug = submission.container_slug.presence ||
                        language_settings.container_slug
 

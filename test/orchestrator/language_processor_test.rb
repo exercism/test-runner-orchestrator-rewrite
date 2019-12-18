@@ -35,7 +35,7 @@ module Orchestrator
       queue.push(submission)
 
       test_runner = stub_test_runner!
-      test_runner.expects(:process_submission).with(submission).returns(true)
+      test_runner.expects(:test_submission).with(submission).returns(true)
 
       with_language_processor(:ruby, queue, nil) do |language_processor|
         language_processor.run!
@@ -57,7 +57,7 @@ module Orchestrator
 
       test_run = mock(no_workers_available?: false, status_code: nil)
       test_runner = stub_test_runner!
-      test_runner.expects(:process_submission).with(submission).raises(TestRunError.new(test_run))
+      test_runner.expects(:test_submission).with(submission).raises(TestRunError.new(test_run))
 
       with_language_processor(:ruby, queue, nil) do |language_processor|
         language_processor.run!
@@ -78,7 +78,7 @@ module Orchestrator
       test_run = mock(no_workers_available?: false, status_code: nil)
       test_run.expects(:post_to_spi!)
       test_runner = stub_test_runner!
-      test_runner.expects(:process_submission).with(submission).raises(TestRunError.new(test_run))
+      test_runner.expects(:test_submission).with(submission).raises(TestRunError.new(test_run))
 
       with_language_processor(:ruby, queue, nil) do |language_processor|
         language_processor.run!
@@ -111,7 +111,7 @@ module Orchestrator
       test_run = mock
       test_run.stubs(no_workers_available?: true, status_code: nil)
       test_runner = stub_test_runner!
-      test_runner.expects(:process_submission).times(40).with(submission).raises(TestRunError.new(test_run))
+      test_runner.expects(:test_submission).times(40).with(submission).raises(TestRunError.new(test_run))
 
       with_language_processor(nil, queue) do |language_processor|
         language_processor.expects(:sleep).times(39).with(0.05)
@@ -128,7 +128,7 @@ module Orchestrator
       queue.expects(:push).with(submission)
 
       test_runner = stub_test_runner!
-      test_runner.expects(:process_submission).twice.with(submission).raises(RuntimeError)
+      test_runner.expects(:test_submission).twice.with(submission).raises(RuntimeError)
 
       with_language_processor(nil, queue) do |language_processor|
         language_processor.send(:test_submission!, submission)

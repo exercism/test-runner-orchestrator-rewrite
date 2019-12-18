@@ -19,7 +19,7 @@ module Orchestrator
       conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout).returns(success_data)
 
       test_runner = TestRunner.new(mock(timeout_ms: timeout))
-      test_runner.process_submission(submission)
+      test_runner.test_submission(submission)
     end
 
     def test_uses_default_container_slug
@@ -46,9 +46,9 @@ module Orchestrator
         'container_slug' => container_slug
       )
       test_runner = TestRunner.new(settings)
-      test_runner.process_submission(submission_with_nil)
-      test_runner.process_submission(submission_with_blank)
-      test_runner.process_submission(submission_with_none)
+      test_runner.test_submission(submission_with_nil)
+      test_runner.test_submission(submission_with_blank)
+      test_runner.test_submission(submission_with_none)
     end
 
     def test_raises_for_no_workers
@@ -59,7 +59,7 @@ module Orchestrator
 
       runner = TestRunner.new(mock(timeout_ms: 100))
       assert_raises(TestRunError) do
-        runner.process_submission(Submission.new(123, :ruby, :bob, "git..."))
+        runner.test_submission(Submission.new(123, :ruby, :bob, "git..."))
       end
     end
 
@@ -81,7 +81,7 @@ module Orchestrator
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
       submission = Submission.new(uuid, :ruby, :bob, "git...")
-      runner.process_submission(submission)
+      runner.test_submission(submission)
     end
 
     def test_posts_for_400s
@@ -102,7 +102,7 @@ module Orchestrator
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
       submission = Submission.new(uuid, :ruby, :bob, "git...")
-      runner.process_submission(submission)
+      runner.test_submission(submission)
     end
   end
 end

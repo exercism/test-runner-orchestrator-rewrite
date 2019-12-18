@@ -56,7 +56,7 @@ module Orchestrator
         Logger.log_submission(submission, "Testing #{submission.num_errored_test_runs + 1}/#{num_worker_available_attempts + 1}")
 
         num_worker_available_attempts += 1
-        test_runner.process_submission(submission)
+        test_runner.test_submission(submission)
 
       rescue TestRunError => e
         Logger.log_submission(submission, "Testing failed (#{e.test_run.status_code})")
