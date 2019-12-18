@@ -10,6 +10,14 @@ module Orchestrator
       })
     end
 
+    def self.post_unknown_error(submission_uuid, message)
+      url = "#{spi_adddress}/submissions/#{submission_uuid}/test_runs"
+      RestClient.post(url, {
+        ops_status: 500,
+        ops_message: "An unknown error occurred. The exception message was: #{message}"
+      })
+    end
+
     private
 
     def self.spi_adddress

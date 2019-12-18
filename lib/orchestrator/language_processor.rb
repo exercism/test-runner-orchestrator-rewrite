@@ -46,19 +46,70 @@ module Orchestrator
     end
 
     def test_submission!(submission)
-      max_attempts = 40
       backoff_ms = 50
-      num_attempts = 0
+      num_worker_available_attempts = 0
+      max_worker_available_attempts = 40
+
+      retry_unknown_error = true
 
       begin
-        num_attempts += 1
+        num_worker_available_attempts += 1
         res = test_runner.process_submission(submission)
         queue.push(submission) unless res
 
+      # If there are no workers avaliable then let's retry
+      # this a few times ith a backoff between each
       rescue NoWorkersAvailableError
-        if num_attempts < max_attempts
+        if num_worker_available_attempts < max_worker_available_attempts
           sleep(backoff_ms / 1000.0)
           retry
+        end
+
+      # If we get to this rescue then something pretty
+      # bad has happened. The most likely thing is that
+      # the website has gone down and we can't connect
+      # to the SPI or to 0mq. At this stage we're probably
+      # in trouble and should requeue this message and
+      # get out of here.
+      #
+      # Retry once in case of some sort of network glitch
+      # otherwise add it back to the back of the queue.
+      # If it *is* a problem with the solution this will
+      # happen again and then we'll try sending it back to the
+      # SPI. If that fails, we're just going to throw
+      # this message away and we can deal with it upstream.
+      #
+      # TODO - We should probably push this to bugsnag
+      rescue => e
+        Logger.log_submission(submission, "======")
+        Logger.log_submission(submission, "Exception while running tests (#{retry_unknown_error ? "first" : "second"} time)")
+        Logger.log_submission(submission, e.class.name)
+        Logger.log_submission(submission, e.message)
+        Logger.log_submission(submission, "------")
+
+        if retry_unknown_error
+          retry_unknown_error = false
+          retry
+        end
+
+        submission.increment_errors!
+        unless submission.errored_too_many_times?
+          queue.push(submission)
+          return
+        end
+
+        # Ensure that we catch this error too, so that we don't
+        # exit the whole processor.
+        #
+        # TODO - We should definitely push this to Bugnsag
+        begin
+          SPIClient.post_unknown_error(submission.uuid, e.message)
+        rescue => e
+          Logger.log_submission(submission, "======")
+          Logger.log_submission(submission, "Exception when posting error to SPI")
+          Logger.log_submission(submission, e.class.name)
+          Logger.log_submission(submission, e.message)
+          Logger.log_submission(submission, "------")
         end
       end
     end

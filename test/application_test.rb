@@ -7,19 +7,15 @@ module Orchestrator
       application.add_language(:ruby, nil, nil)
       application.add_language(:javascript, nil, nil)
 
-      ruby_submission_1 = Submission.new(:ruby, :two_fer, 1)
-      ruby_submission_2 = Submission.new(:ruby, :two_fer, 2)
-      js_submission_1 = Submission.new(:javascript, :two_fer, 1)
-
-      application.enqueue_submission(ruby_submission_1)
+      application.enqueue_submission(:ruby, :two_fer, 1)
       assert_equal 1, application.queue_size(language: :ruby)
       assert_equal 0, application.queue_size(language: :javascript)
 
-      application.enqueue_submission(ruby_submission_2)
+      application.enqueue_submission(:ruby, :two_fer, 2)
       assert_equal 2, application.queue_size(language: :ruby)
       assert_equal 0, application.queue_size(language: :javascript)
 
-      application.enqueue_submission(js_submission_1)
+      application.enqueue_submission(:javascript, :two_fer, 3)
       assert_equal 2, application.queue_size(language: :ruby)
       assert_equal 1, application.queue_size(language: :javascript)
     end

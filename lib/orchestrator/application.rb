@@ -1,7 +1,7 @@
 module Orchestrator
   class Application
     def self.start!
-      new.start!
+      new.tap(&:start!)
     end
 
     def initialize
@@ -13,8 +13,8 @@ module Orchestrator
       add_language(:ruby, 2000, "git-abc123")
       add_language(:javascript, 2000, "git-abc123")
 
-      add_language_processor(:ruby)
-      add_language_processor(:javascript)
+      add_processor(language: :ruby)
+      add_processor(language: :javascript)
     end
 
     def add_language(slug, timeout, container_version)
@@ -26,7 +26,8 @@ module Orchestrator
       end
     end
 
-    def enqueue_submission(submission)
+    def enqueue_submission(language_slug, exercise_slug, submission_uuid)
+      submission = Submission.new(language_slug, exercise_slug, submission_uuid)
       borrow_language(submission.language) do |lang|
         lang.enqueue_submission(submission)
       end

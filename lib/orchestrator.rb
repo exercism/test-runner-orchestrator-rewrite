@@ -10,6 +10,8 @@ require 'rest-client'
 require "ext/string"
 require "ext/nilclass"
 
+require "orchestrator/logger"
+
 require "orchestrator/application"
 require "orchestrator/exceptions"
 require "orchestrator/language"

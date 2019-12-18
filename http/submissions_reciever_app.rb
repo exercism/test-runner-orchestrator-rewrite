@@ -5,17 +5,25 @@ require "sinatra/base"
 require "sinatra/json"
 require "orchestrator"
 
-application = Orchestrator::Application.start!
 
 class SubmissionsReceiverApp < Sinatra::Base
+  def initialize
+    super
+    @orchestrator = Orchestrator::Application.start!
+  end
+
+  private
+  attr_reader :orchestrator
+
   post '/submissions' do
-    submission = Submission.new(
+    submission_uuid = params[:submission_uuid]
+    puts "Queuing #{submission_uuid.split("-").last}: #{submission_uuid}"
+
+    orchestrator.enqueue_submission(
       params[:track_slug],
       params[:exercise_slug],
-      params[:submission_uuid]
+      submission_uuid
     )
-    puts "Queuing #{submission_uuid.split("-").last}: #{submission_uuid}"
-    application.enqueue_submission(submission)
 
     json received: :ok
   end

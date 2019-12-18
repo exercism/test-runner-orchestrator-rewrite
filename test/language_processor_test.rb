@@ -77,10 +77,7 @@ module Orchestrator
     def test_no_worker_loop
       stub_spi_client!
 
-      submission = mock
-
-      queue = mock
-      queue.stubs(shift: submission)
+      submission = Submission.new(:ruby, :bob, "foobar-1")
 
       test_runner = stub_test_runner!
       test_runner.expects(:process_submission).times(40).with(submission).raises(NoWorkersAvailableError)
@@ -90,5 +87,22 @@ module Orchestrator
         language_processor.send(:test_submission!, submission)
       end
     end
+
+    def test_bad_exception_loop
+      stub_spi_client!
+
+      submission = Submission.new(:ruby, :bob, "foobar")
+
+      queue = mock
+      queue.expects(:push).with(submission)
+
+      test_runner = stub_test_runner!
+      test_runner.expects(:process_submission).twice.with(submission).raises(RuntimeError)
+
+      with_language_processor(nil, queue) do |language_processor|
+        language_processor.send(:test_submission!, submission)
+      end
+    end
+
   end
 end
