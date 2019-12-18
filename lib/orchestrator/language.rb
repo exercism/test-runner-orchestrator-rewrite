@@ -10,6 +10,7 @@ module Orchestrator
       @queue = Queue.new
       @processors_mvar = Concurrent::MVar.new([])
       @settings = LanguageSettings.new(settings_hash)
+      @monitor = LanguageMonitor.new
     end
 
     def update_settings(data)
@@ -26,7 +27,7 @@ module Orchestrator
 
         if new_count > current_count
           (new_count - current_count).times do
-            processors.push(LanguageProcessor.run!(queue, settings))
+            processors.push(LanguageProcessor.run!(queue, monitor, settings))
           end
         else
           processors[0, (current_count - new_count)].each do |processor|
@@ -50,6 +51,6 @@ module Orchestrator
     end
 
     private
-    attr_reader :queue, :processors_mvar
+    attr_reader :queue, :monitor, :processors_mvar
   end
 end

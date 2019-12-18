@@ -28,8 +28,8 @@ module Minitest
     end
 =end
 
-    def with_language_processor(lang, queue, settings = mock, &block)
-      lp = Orchestrator::LanguageProcessor.new(queue, settings)
+    def with_language_processor(lang, queue, monitor, settings = mock, &block)
+      lp = Orchestrator::LanguageProcessor.new(queue, monitor, settings)
       begin
         block.call(lp)
       ensure

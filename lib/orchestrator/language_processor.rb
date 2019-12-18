@@ -30,11 +30,12 @@ module Orchestrator
     end
 
     private
-    attr_reader :queue, :test_runner, :settings, :platform_connection,
-                :should_exit
+    attr_reader :queue, :monitor, :test_runner, :settings,
+                :platform_connection, :should_exit
 
-    def initialize(queue, settings)
+    def initialize(queue, monitor, settings)
       @queue = queue
+      @monitor = monitor
       @settings = settings
       @platform_connection = PlatformConnection.new
       @should_exit = Concurrent::AtomicBoolean.new(false)
@@ -46,11 +47,7 @@ module Orchestrator
 
       handled, status = TestRunner.new(submission, platform_connection, settings).test!
       queue.push(submission) unless handled
-
-      # TODO - Add a monitor here that belongs to language
-      # which records the most recent statuses in order to
-      # alert us if something starts going wrong, and automatically
-      # reduce the number of processors, etc.
+      monitor.record!(submission.uuid, status)
 
       true
     end

@@ -11,7 +11,7 @@ module Orchestrator
       # This should be 1 / CHECK_FREQUENCY_MS.to_s
       queue.expects(:shift).at_least(9)
 
-      language_processor = LanguageProcessor.new(queue, nil)
+      language_processor = LanguageProcessor.new(queue, nil, nil)
 
       # Sleep for one second then exit.
       Thread.new do
@@ -31,15 +31,19 @@ module Orchestrator
     def test_works_with_handled_test_run
       stub_platform_connection!
 
-      submission = Submission.new("023949s9dads", :ruby, :bob)
+      uuid = "023949s9dads"
+      submission = Submission.new(uuid, :ruby, :bob)
       queue = Queue.new
       queue.push(submission)
       queue.expects(:push).never
 
-      test_runner = stub_test_runner!
-      test_runner.expects(:test!).returns([true, 999])
+      monitor = mock
+      monitor.expects(:record!).with(uuid, 200)
 
-      with_language_processor(:ruby, queue, nil) do |language_processor|
+      test_runner = stub_test_runner!
+      test_runner.expects(:test!).returns([true, 200])
+
+      with_language_processor(:ruby, queue, monitor, nil) do |language_processor|
         language_processor.run!
         sleep(0.1)
       end
@@ -50,15 +54,19 @@ module Orchestrator
     def test_works_with_unhandled_test_run
       stub_platform_connection!
 
-      submission = Submission.new("023949s9dads", :ruby, :bob)
+      uuid = "023949s9dads"
+      submission = Submission.new(uuid, :ruby, :bob)
       queue = Queue.new
       queue.push(submission)
       queue.expects(:push).with(submission)
 
-      test_runner = stub_test_runner!
-      test_runner.expects(:test!).returns([false, 999])
+      monitor = mock
+      monitor.expects(:record!).with(uuid, 405)
 
-      with_language_processor(:ruby, queue, nil) do |language_processor|
+      test_runner = stub_test_runner!
+      test_runner.expects(:test!).returns([false, 405])
+
+      with_language_processor(:ruby, queue, monitor, nil) do |language_processor|
         language_processor.run!
         sleep(0.1)
       end
