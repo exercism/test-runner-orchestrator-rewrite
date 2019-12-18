@@ -10,31 +10,21 @@ module Orchestrator
       js_container_version = "barfood"
 
       data = {
-        test_runners: {
-          ruby: {
-            timeout_ms: ruby_timeout,
-            container_version: ruby_container_version
-          },
-          javascript: {
-            timeout_ms: js_timeout,
-            container_version: js_container_version
-          }
-        }
-      }
-
-      RestClient.expects(:get).with("http://test-host.exercism.io/infrastructure/test_runners").returns(data.to_json)
-
-      expected = {
         'ruby' => {
           'timeout_ms' => ruby_timeout,
-          'container_version' => ruby_container_version
+          'container_version' => ruby_container_version,
+          'num_processors' => 3,
         },
         'javascript' => {
           'timeout_ms' => js_timeout,
-          'container_version' => js_container_version
+          'container_version' => js_container_version,
+          'num_processors' => 1,
         }
       }
-      assert_equal expected, SPIClient.fetch_languages
+
+      resp = { test_runners: data }.to_json
+      RestClient.expects(:get).with("http://test-host.exercism.io/infrastructure/test_runners").returns(resp)
+      assert_equal data, SPIClient.fetch_languages
     end
 
     def test_post_test_run

@@ -10,16 +10,19 @@ module Orchestrator
 
     def start!
       SPIClient.fetch_languages.each do |slug, settings|
-        add_language(slug.to_sym, settings)
+        slug = slug.to_sym
+        add_language(slug, settings)
       end
-
-      add_processor(language: :ruby)
-      add_processor(language: :javascript)
     end
 
     def add_language(slug, settings)
+      language = Language.new(settings)
+      settings['num_processors'].times do
+        language.add_processor
+      end
+
       borrow_languages do |languages|
-        languages[slug] = Language.new(settings)
+        languages[slug] = language
       end
     end
 
