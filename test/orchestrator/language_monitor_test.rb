@@ -19,12 +19,12 @@ module Orchestrator
 
       Timecop.freeze(Time.new(2019,01,01,12,00)) do
         monitor.record!(SecureRandom.uuid, 200)
-        assert_equal [200], monitor.recent_statuses
+        assert_equal [200], monitor.send(:results).borrow {|rs| rs.map{|r|r[2]}}
       end
 
       Timecop.freeze(Time.new(2019,01,01,12,11)) do
         monitor.record!(SecureRandom.uuid, 500)
-        assert_equal [500], monitor.send(:results).map{|r|r[2]}
+        assert_equal [500], monitor.send(:results).borrow {|rs| rs.map{|r|r[2]}}
       end
     end
 
