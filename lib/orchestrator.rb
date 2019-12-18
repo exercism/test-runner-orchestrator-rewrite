@@ -9,6 +9,7 @@ require 'rest-client'
 
 require "ext/string"
 require "ext/nilclass"
+require "ext/s3"
 
 require "orchestrator/logger"
 require "orchestrator/application"
