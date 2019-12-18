@@ -30,8 +30,8 @@ module Orchestrator
     end
 
     private
-    attr_reader :queue, :test_runner, :settings, :platform_connection
-    attr_accessor :should_exit
+    attr_reader :queue, :test_runner, :settings, :platform_connection,
+                :should_exit
 
     def initialize(queue, settings)
       @queue = queue
