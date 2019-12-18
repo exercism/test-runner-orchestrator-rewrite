@@ -1,12 +1,12 @@
 module Orchestrator
   class SPIClient
 
-    def self.post_test_run(submission_uuid, test_run)
+    def self.post_test_run(submission_uuid, status_code, status_message, results)
       url = "#{spi_adddress}/submissions/#{submission_uuid}/test_runs"
       RestClient.post(url, {
-        ops_status: test_run.status_code,
-        ops_message: test_run.status_message,
-        results: test_run.results
+        ops_status: status_code,
+        ops_message: status_message,
+        results: results
       })
     end
 

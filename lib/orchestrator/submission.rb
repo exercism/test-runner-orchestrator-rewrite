@@ -6,6 +6,15 @@ module Orchestrator
       @exercise = exercise.to_sym
       @uuid = uuid
       @container_version = container_version
+      @num_errored_test_runs = 0
+    end
+
+    def increment_errors!
+      self.num_errored_test_runs += 1
+    end
+
+    def errored_too_many_times?
+      false
     end
 
     # TODO - Extract this to some helper builder method
@@ -20,5 +29,7 @@ module Orchestrator
       @secrets ||= YAML::load(ERB.new(File.read(File.dirname(__FILE__) + "/../../config/secrets.yml")).result)[Orchestrator.env]
     end
 
+    protected
+    attr_accessor :num_errored_test_runs
   end
 end

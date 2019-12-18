@@ -4,6 +4,12 @@ module Orchestrator
       @submissions = Concurrent::MVar.new(Array.new)
     end
 
+    def size
+      submissions.borrow do |arr|
+        arr.size
+      end
+    end
+
     def push(submission)
       submissions.borrow do |arr|
         arr.push(submission)

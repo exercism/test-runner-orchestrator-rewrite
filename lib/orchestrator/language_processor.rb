@@ -43,7 +43,6 @@ module Orchestrator
 
       test_submission!(submission)
       true
-
     end
 
     def test_submission!(submission)
@@ -53,7 +52,9 @@ module Orchestrator
 
       begin
         num_attempts += 1
-        test_runner.process_submission(submission)
+        res = test_runner.process_submission(submission)
+        queue.push(submission) unless res
+
       rescue NoWorkersAvailableError
         if num_attempts < max_attempts
           sleep(backoff_ms / 1000.0)

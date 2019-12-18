@@ -30,22 +30,32 @@ module Orchestrator
 
     def test_runs_a_submission_correctly
       stub_spi_client!
-      language = :ruby
-      exercise = :bob
-      uuid = "023949s9dads"
-      s3_uri = "s3://test-exercism-submissions/test/testing/#{uuid}"
-      submission = Submission.new(language, exercise, uuid)
+      submission = Submission.new(:ruby, :bob, "023949s9dads")
       queue = Queue.new
       queue.push(submission)
 
-      timeout = 2000
-      container_version = "git-123asd"
-      settings = LanguageSettings.new(:ruby, timeout, container_version)
+      test_runner = stub_test_runner!
+      test_runner.expects(:process_submission).with(submission).returns(true)
 
-      conn = stub_platform_connection!
-      conn.expects(:run_tests).with(language, exercise, s3_uri, container_version, timeout)
+      with_language_processor(:ruby, queue, nil) do |language_processor|
+        language_processor.run!
+        sleep(0.1)
+      end
 
-      with_language_processor(:ruby, queue, settings) do |language_processor|
+      assert_equal 0, queue.size
+    end
+
+    def test_requeues_if_run_fails
+      stub_spi_client!
+      submission = Submission.new(:ruby, :bob, "023949s9dads")
+      queue = Queue.new
+      queue.push(submission)
+      queue.expects(:push).with(submission)
+
+      test_runner = stub_test_runner!
+      test_runner.expects(:process_submission).with(submission).returns(false)
+
+      with_language_processor(:ruby, queue, nil) do |language_processor|
         language_processor.run!
         sleep(0.1)
       end

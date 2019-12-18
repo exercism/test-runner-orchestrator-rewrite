@@ -9,14 +9,6 @@ module Orchestrator
       results = {"foo" => "bar"}
       submission_uuid = SecureRandom.uuid
 
-      test_run = TestRun.new({
-        "status" => {
-          "status_code" => status_code,
-          "message" => status_message,
-        },
-        "response" => results
-      })
-
       RestClient.expects(:post).with(
         "http://test-host.exercism.io/submissions/#{submission_uuid}/test_runs",
         {
@@ -25,7 +17,7 @@ module Orchestrator
           results: results
         }
       )
-      SPIClient.post_test_run(submission_uuid, test_run)
+      SPIClient.post_test_run(submission_uuid, status_code, status_message, results)
     end
   end
 end
