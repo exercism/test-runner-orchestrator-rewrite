@@ -1,6 +1,11 @@
 module Orchestrator
   class SPIClient
 
+    def self.fetch_languages
+      url = "#{spi_adddress}/infrastructure/test_runners"
+      JSON.parse(RestClient.get(url))["test_runners"]
+    end
+
     def self.post_test_run(submission_uuid, status_code, status_message, results)
       url = "#{spi_adddress}/submissions/#{submission_uuid}/test_runs"
       RestClient.post(url, {

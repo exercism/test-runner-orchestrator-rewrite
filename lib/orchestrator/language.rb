@@ -6,14 +6,10 @@ module Orchestrator
   class Language
     attr_reader :timeout_ms, :container_version
 
-    def initialize(timeout_ms: ,
-                   container_version: )
+    def initialize(settings_hash)
       @queue = Queue.new
       @processors = []
-      @settings = LanguageSettings.new(
-        timeout_ms: timeout_ms,
-        container_version: container_version
-      )
+      @settings = LanguageSettings.from_hash(settings_hash)
     end
 
     def add_processor

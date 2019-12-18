@@ -4,8 +4,8 @@ module Orchestrator
   class ApplicationTest < Minitest::Test
     def test_enqueue_submission_proxies
       application = Application.new
-      application.add_language(:ruby, nil, nil)
-      application.add_language(:javascript, nil, nil)
+      application.add_language(:ruby, {})
+      application.add_language(:javascript, {})
 
       application.enqueue_submission(:ruby, :two_fer, 1)
       assert_equal 1, application.queue_size(language: :ruby)
@@ -25,8 +25,8 @@ module Orchestrator
     # errors between all the pieces so I'm ok with it for now.
     def test_add_language_processor_proxies
       application = Application.new
-      application.add_language(:ruby, nil, nil)
-      application.add_language(:javascript, nil, nil)
+      application.add_language(:ruby, {})
+      application.add_language(:javascript, {})
 
       stub_platform_connection!(times: 3)
       stub_language_processor_run!(times: 3)

@@ -9,20 +9,17 @@ module Orchestrator
     end
 
     def start!
-      # TODO - Retrieve languages from the SPI
-      add_language(:ruby, 2000, "git-abc123")
-      add_language(:javascript, 2000, "git-abc123")
+      SPIClient.fetch_languages.each do |slug, settings|
+        add_language(slug.to_sym, settings)
+      end
 
       add_processor(language: :ruby)
       add_processor(language: :javascript)
     end
 
-    def add_language(slug, timeout, container_version)
+    def add_language(slug, settings)
       borrow_languages do |languages|
-        languages[slug] = Language.new(
-          timeout_ms: timeout,
-          container_version: container_version
-        )
+        languages[slug] = Language.new(settings)
       end
     end
 
