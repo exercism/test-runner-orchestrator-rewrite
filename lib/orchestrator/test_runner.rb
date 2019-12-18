@@ -9,7 +9,7 @@ module Orchestrator
       container_slug = submission.container_slug.presence ||
                        language_settings.container_slug
 
-      test_run = TestRun.new(
+      TestRun.new(
         submission.uuid,
         platform_connection.run_tests(
           submission.language,
@@ -19,26 +19,6 @@ module Orchestrator
           language_settings.timeout_ms
         )
       )
-
-      # If we've been successful or we've got an error that's not
-      # going to change, then record it and exit successfully
-      if test_run.ran_successfully?
-        Logger.log_submission(submission, "Testing succeeded")
-        test_run.post_to_spi!
-        Logger.log_submission(submission, "Reported back to SPI")
-        return
-      end
-
-      if test_run.permanent_error?
-        Logger.log_submission(submission, "Testing failed (#{test_run.status_code})")
-        test_run.post_to_spi!
-        Logger.log_submission(submission, "Reported back to SPI")
-        return
-      end
-
-      # If we've got an error, so let's raise the exception
-      # and we'll hadnle it upstream
-      raise TestRunError.new(test_run)
     end
 
     private

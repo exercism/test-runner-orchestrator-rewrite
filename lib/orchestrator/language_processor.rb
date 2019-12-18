@@ -47,26 +47,31 @@ module Orchestrator
 
     def test_submission!(submission)
       backoff_ms = 50
-      num_worker_available_attempts = 0
-      max_worker_available_attempts = 40
+      num_worker_unavailable_attempts = 0
+      max_worker_unavailable_attempts = 40
 
       retry_unknown_error = true
 
       begin
-        Logger.log_submission(submission, "Testing #{submission.num_errored_test_runs + 1}/#{num_worker_available_attempts + 1}")
+        Logger.log_submission(submission, "Starting testing #{submission.num_errored_test_runs + 1}/#{num_worker_unavailable_attempts + 1}")
+        test_run = test_runner.test_submission(submission)
 
-        num_worker_available_attempts += 1
-        test_runner.test_submission(submission)
+        Logger.log_submission(submission, "Finished testing (#{test_run.status_code})")
 
-      rescue TestRunError => e
-        Logger.log_submission(submission, "Testing failed (#{e.test_run.status_code})")
+        # If we've been successful or we've got an error that's not
+        # going to change, then record it and exit successfully
+        return test_run.post_to_spi! if test_run.ran_successfully? ||
+                                        test_run.permanent_error?
 
         # If there are no workers avaliable then let's retry
-        # this a few times ith a backoff between each
-        if e.test_run.no_workers_available?
-          if num_worker_available_attempts < max_worker_available_attempts
-            sleep(backoff_ms / 1000.0)
-            retry
+        # this a few times ith a backoff between each. Once
+        # we hit the threshhold, we just treat this like any
+        # other error.
+        if test_run.no_workers_available?
+          num_worker_unavailable_attempts += 1
+
+          if num_worker_unavailable_attempts < max_worker_unavailable_attempts
+            raise NoWorkersAvailableError
           end
         end
 
@@ -78,14 +83,15 @@ module Orchestrator
         # If we've failed too many times then post the result back
         # otherwise put it back on the queue for next time
         if submission.errored_too_many_times?
-          Logger.log_submission(submission, "Too many errors. Giving up")
-          e.test_run.post_to_spi!
-          Logger.log_submission(submission, "Alerted SPI")
+          Logger.log_submission(submission, "Too many errors. Giving up.")
+          test_run.post_to_spi!
         else
-          Logger.log_submission(submission, "Errored. Requeuing")
+          Logger.log_submission(submission, "Errored. Attempting to requeue.")
           queue.push(submission)
-          Logger.log_submission(submission, "Requeued successfully")
         end
+      rescue NoWorkersAvailableError => e
+        sleep(backoff_ms / 1000.0)
+        retry
 
       # If we get to this rescue then something pretty
       # bad has happened. The most likely thing is that
@@ -115,10 +121,7 @@ module Orchestrator
         end
 
         submission.increment_errors!
-        unless submission.errored_too_many_times?
-          queue.push(submission)
-          return
-        end
+        return queue.push(submission) unless submission.errored_too_many_times?
 
         # Ensure that we catch this error too, so that we don't
         # exit the whole processor.

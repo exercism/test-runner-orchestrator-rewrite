@@ -14,6 +14,8 @@ module Orchestrator
       submissions.borrow do |arr|
         arr.push(submission)
       end
+
+      Logger.log_submission(submission, "Queued successfully")
     end
 
     def shift

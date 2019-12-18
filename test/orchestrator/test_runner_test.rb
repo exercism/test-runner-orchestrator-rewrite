@@ -51,58 +51,16 @@ module Orchestrator
       test_runner.test_submission(submission_with_none)
     end
 
-    def test_raises_for_no_workers
+    def test_returns_test_run
       data = JSON.parse({ status: { status_code: 503 } }.to_json)
 
       platform_connection = stub_platform_connection!
       platform_connection.expects(:run_tests).returns(data)
 
       runner = TestRunner.new(mock(timeout_ms: 100))
-      assert_raises(TestRunError) do
-        runner.test_submission(Submission.new(123, :ruby, :bob, "git..."))
-      end
-    end
+      test_run = runner.test_submission(Submission.new(123, :ruby, :bob, "git..."))
 
-    def test_posts_for_200s
-      uuid = SecureRandom.uuid
-      status_code = 200
-      message = "foobar"
-      results = {"what" => "else"}
-
-      data = JSON.parse({
-        status: { status_code: status_code, message: message },
-        response: results
-      }.to_json)
-
-      platform_connection = stub_platform_connection!
-      platform_connection.expects(:run_tests).returns(data)
-
-      runner = TestRunner.new(mock(timeout_ms: 100))
-      SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
-
-      submission = Submission.new(uuid, :ruby, :bob, "git...")
-      runner.test_submission(submission)
-    end
-
-    def test_posts_for_400s
-      uuid = SecureRandom.uuid
-      status_code = 400
-      message = "foobar"
-      results = {"what" => "else"}
-
-      data = JSON.parse({
-        status: { status_code: status_code, message: message },
-        response: results
-      }.to_json)
-
-      platform_connection = stub_platform_connection!
-      platform_connection.expects(:run_tests).returns(data)
-
-      runner = TestRunner.new(mock(timeout_ms: 100))
-      SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
-
-      submission = Submission.new(uuid, :ruby, :bob, "git...")
-      runner.test_submission(submission)
+      assert_equal 503, test_run.status_code
     end
   end
 end
