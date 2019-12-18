@@ -16,10 +16,9 @@ module Orchestrator
       end
     end
 
-    def shift(language: )
+    def shift
       submissions.borrow do |arr|
-        idx = arr.find_index {|s| s.language == language }
-        idx ? arr.delete_at(idx) : nil
+        arr.shift
       end
     end
 

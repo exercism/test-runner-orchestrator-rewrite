@@ -9,9 +9,9 @@ module Orchestrator
 
       # TODO - Add a range of 9-11 here
       # This should be 1 / CHECK_FREQUENCY_MS.to_s
-      queue.expects(:shift).with(language: :ruby).at_least(9)
+      queue.expects(:shift).at_least(9)
 
-      language_processor = LanguageProcessor.new(:ruby, queue, mock)
+      language_processor = LanguageProcessor.new(queue, nil)
 
       # Sleep for one second then exit.
       Thread.new do
@@ -65,7 +65,7 @@ module Orchestrator
       stub_test_runner!
 
       queue = mock
-      queue.expects(:shift).with(language: :ruby).returns(nil).at_least_once
+      queue.expects(:shift).returns(nil).at_least_once
 
       with_language_processor(:ruby, queue, mock) do |language_processor|
         language_processor.expects(:sleep).with(0.1).at_least_once
@@ -85,7 +85,7 @@ module Orchestrator
       test_runner = stub_test_runner!
       test_runner.expects(:process_submission).times(40).with(submission).raises(NoWorkersAvailableError)
 
-      with_language_processor(:ruby, mock, mock) do |language_processor|
+      with_language_processor(nil, nil) do |language_processor|
         language_processor.expects(:sleep).times(39).with(0.05)
         language_processor.send(:test_submission!, submission)
       end

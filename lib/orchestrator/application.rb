@@ -5,29 +5,64 @@ module Orchestrator
     end
 
     def initialize
-      @queue = Queue.new
-      @language_processors = Hash.new {|h,k|h[k] = []}
-      @language_settings = Hash.new {|h,k|h[k] = {}}
+      @languages = Concurrent::MVar.new(Hash.new)
     end
 
     def start!
       # TODO - Retrieve languages from the SPI
-      language_settings[:ruby] = LanguageSettings.new(:ruby, 2000, "git-abc123")
+      add_language(:ruby, 2000, "git-abc123")
+      add_language(:javascript, 2000, "git-abc123")
 
       add_language_processor(:ruby)
       add_language_processor(:javascript)
     end
 
-    def enqueue_submission(submission)
-      queue.push(submission)
+    def add_language(slug, timeout, container_version)
+      borrow_languages do |languages|
+        languages[slug] = Language.new(
+          timeout_ms: timeout,
+          container_version: container_version
+        )
+      end
     end
 
-    def add_language_processor(language)
-      lp = LanguageProcessor.run!(language, queue, language_settings[language])
-      language_processors[language].push(lp)
+    def enqueue_submission(submission)
+      borrow_language(submission.language) do |lang|
+        lang.enqueue_submission(submission)
+      end
+    end
+
+    def add_processor(language: )
+      borrow_language(language.to_sym) do |lang|
+        lang.add_processor
+      end
+    end
+
+    def queue_size(language: )
+      borrow_language(language.to_sym) do |lang|
+        lang.queue_size
+      end
+    end
+
+    def num_processors(language: )
+      borrow_language(language.to_sym) do |lang|
+        lang.num_processors
+      end
     end
 
     private
-    attr_reader :queue, :language_processors, :language_settings
+    attr_reader :languages
+
+    def borrow_languages
+      languages.borrow do |langs|
+        yield(langs)
+      end
+    end
+
+    def borrow_language(lang)
+      borrow_languages do |langs|
+        yield(langs[lang])
+      end
+    end
   end
 end

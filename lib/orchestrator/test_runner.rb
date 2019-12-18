@@ -1,7 +1,6 @@
 module Orchestrator
   class TestRunner
-    def initialize(language, language_settings)
-      @language = language
+    def initialize(language_settings)
       @language_settings = language_settings
       @platform_connection = PlatformConnection.new
     end
@@ -52,6 +51,6 @@ module Orchestrator
     end
 
     private
-    attr_reader :language, :language_settings, :platform_connection
+    attr_reader :language_settings, :platform_connection
   end
 end

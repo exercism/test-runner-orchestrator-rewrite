@@ -9,9 +9,7 @@ module Orchestrator
       exercise = :bob
       uuid = "023949s9dads"
       s3_uri = "s3://test-exercism-submissions/test/testing/#{uuid}"
-
       timeout = 2000
-      settings = LanguageSettings.new(:ruby, timeout, mock)
 
       container_version = "git-123asd"
       submission = Submission.new(language, exercise, uuid, container_version)
@@ -19,11 +17,11 @@ module Orchestrator
       conn = stub_platform_connection!
       conn.expects(:run_tests).with(language, exercise, s3_uri, container_version, timeout)
 
-      test_runner = TestRunner.new(language, settings)
+      test_runner = TestRunner.new(mock(timeout_ms: timeout))
       test_runner.process_submission(submission)
     end
 
-    def test_uses_default_container_container_version
+    def test_uses_default_container_version
       stub_spi_client!
 
       language = :ruby
@@ -37,12 +35,15 @@ module Orchestrator
 
       container_version = "git-123asd"
       timeout = 2000
-      settings = LanguageSettings.new(:ruby, timeout, container_version)
 
       conn = stub_platform_connection!
       conn.expects(:run_tests).with(language, exercise, s3_uri, container_version, timeout).times(3)
 
-      test_runner = TestRunner.new(language, settings)
+      settings = LanguageSettings.new(
+        timeout_ms: timeout,
+        container_version: container_version
+      )
+      test_runner = TestRunner.new(settings)
       test_runner.process_submission(submission_with_nil)
       test_runner.process_submission(submission_with_blank)
       test_runner.process_submission(submission_with_none)
@@ -56,7 +57,7 @@ module Orchestrator
       platform_connection = stub_platform_connection!
       platform_connection.expects(:run_tests).returns(data)
 
-      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      runner = TestRunner.new(mock(timeout_ms: 100))
       assert_raises(NoWorkersAvailableError) do
         runner.process_submission(Submission.new(:ruby, :bob, 123, "git..."))
       end
@@ -76,7 +77,7 @@ module Orchestrator
       platform_connection = stub_platform_connection!
       platform_connection.expects(:run_tests).returns(data)
 
-      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      runner = TestRunner.new(mock(timeout_ms: 100))
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
       submission = Submission.new(:ruby, :bob, uuid, "git...")
@@ -97,7 +98,7 @@ module Orchestrator
       platform_connection = stub_platform_connection!
       platform_connection.expects(:run_tests).returns(data)
 
-      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      runner = TestRunner.new(mock(timeout_ms: 100))
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
       submission = Submission.new(:ruby, :bob, uuid, "git...")
@@ -110,7 +111,7 @@ module Orchestrator
       platform_connection = stub_platform_connection!
       platform_connection.expects(:run_tests).returns(data)
 
-      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      runner = TestRunner.new(mock(timeout_ms: 100))
 
       submission = Submission.new(:ruby, :bob, nil, "git...")
 
@@ -125,7 +126,7 @@ module Orchestrator
       platform_connection = stub_platform_connection!
       platform_connection.expects(:run_tests).returns(data)
 
-      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      runner = TestRunner.new(mock(timeout_ms: 100))
 
       submission = Submission.new(:ruby, :bob, nil, "git...")
       submission.expects(:increment_errors!)
@@ -147,7 +148,7 @@ module Orchestrator
       platform_connection = stub_platform_connection!
       platform_connection.expects(:run_tests).returns(data)
 
-      runner = TestRunner.new(mock, mock(timeout_ms: 100))
+      runner = TestRunner.new(mock(timeout_ms: 100))
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
       submission = Submission.new(:ruby, :bob, uuid, "git...")

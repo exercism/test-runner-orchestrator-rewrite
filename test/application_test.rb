@@ -4,35 +4,43 @@ module Orchestrator
   class ApplicationTest < Minitest::Test
     def test_enqueue_submission_proxies
       application = Application.new
-      submission = Submission.new(:ruby, :two_fer, 1)
-      application.enqueue_submission(submission)
+      application.add_language(:ruby, nil, nil)
+      application.add_language(:javascript, nil, nil)
 
-      assert_equal submission, application.send(:queue).shift(language: :ruby)
+      ruby_submission_1 = Submission.new(:ruby, :two_fer, 1)
+      ruby_submission_2 = Submission.new(:ruby, :two_fer, 2)
+      js_submission_1 = Submission.new(:javascript, :two_fer, 1)
+
+      application.enqueue_submission(ruby_submission_1)
+      assert_equal 1, application.queue_size(language: :ruby)
+      assert_equal 0, application.queue_size(language: :javascript)
+
+      application.enqueue_submission(ruby_submission_2)
+      assert_equal 2, application.queue_size(language: :ruby)
+      assert_equal 0, application.queue_size(language: :javascript)
+
+      application.enqueue_submission(js_submission_1)
+      assert_equal 2, application.queue_size(language: :ruby)
+      assert_equal 1, application.queue_size(language: :javascript)
     end
 
     # This whole test is horrible in terms of checking
     # internals but it's also caught lots of integration
     # errors between all the pieces so I'm ok with it for now.
     def test_add_language_processor_proxies
-      ruby_language_settings = mock
-
       application = Application.new
-      application.send(:language_settings)[:ruby] = ruby_language_settings
+      application.add_language(:ruby, nil, nil)
+      application.add_language(:javascript, nil, nil)
 
       stub_platform_connection!(times: 3)
       stub_language_processor_run!(times: 3)
 
-      application.add_language_processor(:ruby)
-      application.add_language_processor(:javascript)
-      application.add_language_processor(:ruby)
+      application.add_processor(language: :ruby)
+      application.add_processor(language: :javascript)
+      application.add_processor(language: :ruby)
 
-      assert_equal 2, application.send(:language_processors)[:ruby].size
-      assert_equal 1, application.send(:language_processors)[:javascript].size
-
-      ruby = application.send(:language_processors)[:ruby].first
-      assert_equal :ruby, ruby.send(:language)
-      assert_equal application.send(:queue), ruby.send(:queue)
-      assert_equal ruby_language_settings, ruby.send(:test_runner).send(:language_settings)
+      assert_equal 2, application.num_processors(language: :ruby)
+      assert_equal 1, application.num_processors(language: :javascript)
     end
   end
 end

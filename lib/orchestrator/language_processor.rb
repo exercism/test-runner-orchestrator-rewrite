@@ -27,18 +27,18 @@ module Orchestrator
     end
 
     private
-    attr_reader :language, :queue, :test_runner
+    attr_reader :queue, :test_runner
     attr_accessor :exit_asap
 
-    def initialize(language, queue, language_settings)
-      @language = language.to_sym
+    def initialize(queue, settings)
       @queue = queue
-      @test_runner = TestRunner.new(language, language_settings)
+      @settings = settings
+      @test_runner = TestRunner.new(settings)
       @exit_asap = Concurrent::AtomicBoolean.new(false)
     end
 
     def process_next_submission!
-      submission = queue.shift(language: language)
+      submission = queue.shift
       return false unless submission
 
       test_submission!(submission)
