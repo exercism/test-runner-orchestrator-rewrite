@@ -17,24 +17,24 @@ module Orchestrator
 
           # Always check for this regardless of whether submission
           # was found or not.
-          break if exit_asap.value
+          break if should_exit.value
         end
       end
     end
 
     def exit!
-      exit_asap.value = true
+      should_exit.value = true
     end
 
     private
     attr_reader :queue, :test_runner
-    attr_accessor :exit_asap
+    attr_accessor :should_exit
 
     def initialize(queue, settings)
       @queue = queue
       @settings = settings
       @test_runner = TestRunner.new(settings)
-      @exit_asap = Concurrent::AtomicBoolean.new(false)
+      @should_exit = Concurrent::AtomicBoolean.new(false)
     end
 
     def process_next_submission!
