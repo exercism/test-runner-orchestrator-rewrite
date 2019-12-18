@@ -9,14 +9,14 @@ module Orchestrator
       max_attempts = 40
       backoff_ms = 50
 
-      container_version = submission.container_version.presence || language_settings.container_version
+      container_slug = submission.container_slug.presence || language_settings.container_slug
       test_run = TestRun.new(
         submission.uuid,
         platform_connection.run_tests(
           submission.language,
           submission.exercise,
           submission.s3_uri,
-          container_version,
+          container_slug,
           language_settings.timeout_ms
         )
       )

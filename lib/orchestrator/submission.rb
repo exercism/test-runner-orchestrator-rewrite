@@ -1,11 +1,11 @@
 module Orchestrator
   class Submission
-    attr_reader :uuid, :language, :exercise, :container_version
-    def initialize(uuid, language, exercise, container_version = nil)
+    attr_reader :uuid, :language, :exercise, :container_slug
+    def initialize(uuid, language, exercise, container_slug = nil)
       @language = language.to_sym
       @exercise = exercise.to_sym
       @uuid = uuid
-      @container_version = container_version
+      @container_slug = container_slug
       @num_errored_test_runs = 0
     end
 

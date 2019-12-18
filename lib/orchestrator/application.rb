@@ -86,7 +86,7 @@ module Orchestrator
             queue_size: lang.queue_size,
             settings: {
               timeout_ms: lang.settings.timeout_ms,
-              container_version: lang.settings.container_version
+              container_slug: lang.settings.container_slug
             }
           }
         end

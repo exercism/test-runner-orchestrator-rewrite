@@ -2,7 +2,7 @@ require 'test_helper'
 
 module Orchestrator
   class TestRunnerTest < Minitest::Test
-    def test_uses_submission_container_version
+    def test_uses_submission_container_slug
       stub_spi_client!
 
       language = :ruby
@@ -11,17 +11,17 @@ module Orchestrator
       s3_uri = "s3://test-exercism-submissions/test/testing/#{uuid}"
       timeout = 2000
 
-      container_version = "git-123asd"
-      submission = Submission.new(uuid, language, exercise, container_version)
+      container_slug = "git-123asd"
+      submission = Submission.new(uuid, language, exercise, container_slug)
 
       conn = stub_platform_connection!
-      conn.expects(:run_tests).with(language, exercise, s3_uri, container_version, timeout)
+      conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout)
 
       test_runner = TestRunner.new(mock(timeout_ms: timeout))
       test_runner.process_submission(submission)
     end
 
-    def test_uses_default_container_version
+    def test_uses_default_container_slug
       stub_spi_client!
 
       language = :ruby
@@ -33,15 +33,15 @@ module Orchestrator
       submission_with_blank = Submission.new(uuid, language, exercise, "")
       submission_with_none = Submission.new(uuid, language, exercise)
 
-      container_version = "git-123asd"
+      container_slug = "git-123asd"
       timeout = 2000
 
       conn = stub_platform_connection!
-      conn.expects(:run_tests).with(language, exercise, s3_uri, container_version, timeout).times(3)
+      conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout).times(3)
 
       settings = LanguageSettings.new(
         'timeout_ms' => timeout,
-        'container_version' => container_version
+        'container_slug' => container_slug
       )
       test_runner = TestRunner.new(settings)
       test_runner.process_submission(submission_with_nil)
