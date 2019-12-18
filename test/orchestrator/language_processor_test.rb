@@ -45,21 +45,48 @@ module Orchestrator
       assert_equal 0, queue.size
     end
 
-    def test_requeues_if_run_fails
+    def test_iterates_and_requeues_if_run_fails
       stub_spi_client!
       submission = Submission.new("023949s9dads", :ruby, :bob)
+      submission.expects(:increment_errors!)
+      submission.expects(:errored_too_many_times?).returns(false)
+
       queue = Queue.new
       queue.push(submission)
       queue.expects(:push).with(submission)
 
+      test_run = mock(no_workers_available?: false, status_code: nil)
       test_runner = stub_test_runner!
-      test_runner.expects(:process_submission).with(submission).returns(false)
+      test_runner.expects(:process_submission).with(submission).raises(TestRunError.new(test_run))
 
       with_language_processor(:ruby, queue, nil) do |language_processor|
         language_processor.run!
         sleep(0.1)
       end
     end
+
+    def test_posts_to_spi_if_too_many_errors
+      stub_spi_client!
+      submission = Submission.new("023949s9dads", :ruby, :bob)
+      submission.expects(:increment_errors!)
+      submission.expects(:errored_too_many_times?).returns(true)
+
+      queue = Queue.new
+      queue.push(submission)
+      queue.expects(:push).never
+
+      test_run = mock(no_workers_available?: false, status_code: nil)
+      test_run.expects(:post_to_spi!)
+      test_runner = stub_test_runner!
+      test_runner.expects(:process_submission).with(submission).raises(TestRunError.new(test_run))
+
+      with_language_processor(:ruby, queue, nil) do |language_processor|
+        language_processor.run!
+        sleep(0.1)
+      end
+
+    end
+
 
     def test_sleeps_if_queue_is_empty
       stub_test_runner!
@@ -79,10 +106,14 @@ module Orchestrator
 
       submission = Submission.new("foobar-1", :ruby, :bob)
 
+      queue = mock
+      queue.expects(:push).with(submission)
+      test_run = mock
+      test_run.stubs(no_workers_available?: true, status_code: nil)
       test_runner = stub_test_runner!
-      test_runner.expects(:process_submission).times(40).with(submission).raises(NoWorkersAvailableError)
+      test_runner.expects(:process_submission).times(40).with(submission).raises(TestRunError.new(test_run))
 
-      with_language_processor(nil, nil) do |language_processor|
+      with_language_processor(nil, queue) do |language_processor|
         language_processor.expects(:sleep).times(39).with(0.05)
         language_processor.send(:test_submission!, submission)
       end
@@ -103,6 +134,5 @@ module Orchestrator
         language_processor.send(:test_submission!, submission)
       end
     end
-
   end
 end

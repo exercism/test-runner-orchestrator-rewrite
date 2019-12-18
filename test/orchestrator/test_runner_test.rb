@@ -15,7 +15,8 @@ module Orchestrator
       submission = Submission.new(uuid, language, exercise, container_slug)
 
       conn = stub_platform_connection!
-      conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout)
+      success_data = JSON.parse({status: {status_code: 200}}.to_json)
+      conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout).returns(success_data)
 
       test_runner = TestRunner.new(mock(timeout_ms: timeout))
       test_runner.process_submission(submission)
@@ -37,7 +38,8 @@ module Orchestrator
       timeout = 2000
 
       conn = stub_platform_connection!
-      conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout).times(3)
+      success_data = JSON.parse({status: {status_code: 200}}.to_json)
+      conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout).times(3).returns(success_data)
 
       settings = LanguageSettings.new(
         'timeout_ms' => timeout,
@@ -50,15 +52,13 @@ module Orchestrator
     end
 
     def test_raises_for_no_workers
-      data = JSON.parse({
-        status: { status_code: 503 }
-      }.to_json)
+      data = JSON.parse({ status: { status_code: 503 } }.to_json)
 
       platform_connection = stub_platform_connection!
       platform_connection.expects(:run_tests).returns(data)
 
       runner = TestRunner.new(mock(timeout_ms: 100))
-      assert_raises(NoWorkersAvailableError) do
+      assert_raises(TestRunError) do
         runner.process_submission(Submission.new(123, :ruby, :bob, "git..."))
       end
     end
@@ -81,7 +81,7 @@ module Orchestrator
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
       submission = Submission.new(uuid, :ruby, :bob, "git...")
-      assert runner.process_submission(submission)
+      runner.process_submission(submission)
     end
 
     def test_posts_for_400s
@@ -102,59 +102,7 @@ module Orchestrator
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
       submission = Submission.new(uuid, :ruby, :bob, "git...")
-      assert runner.process_submission(submission)
-    end
-
-    def test_raises_for_no_workers_avaliable
-      data = JSON.parse({ status: { status_code: 503 }, }.to_json)
-
-      platform_connection = stub_platform_connection!
-      platform_connection.expects(:run_tests).returns(data)
-
-      runner = TestRunner.new(mock(timeout_ms: 100))
-
-      submission = Submission.new(nil, :ruby, :bob, "git...")
-
-      assert_raises NoWorkersAvailableError do
-        runner.process_submission(submission)
-      end
-    end
-
-    def test_increments_then_returns
-      data = JSON.parse({ status: { status_code: 504 } }.to_json)
-
-      platform_connection = stub_platform_connection!
-      platform_connection.expects(:run_tests).returns(data)
-
-      runner = TestRunner.new(mock(timeout_ms: 100))
-
-      submission = Submission.new(nil, :ruby, :bob, "git...")
-      submission.expects(:increment_errors!)
-      submission.expects(:errored_too_many_times?).returns(false)
-      refute runner.process_submission(submission)
-    end
-
-    def test_increments_then_posts
-      uuid = SecureRandom.uuid
-      status_code = 504
-      message = "foobar"
-      results = {"what" => "else"}
-
-      data = JSON.parse({
-        status: { status_code: status_code, message: message },
-        response: results
-      }.to_json)
-
-      platform_connection = stub_platform_connection!
-      platform_connection.expects(:run_tests).returns(data)
-
-      runner = TestRunner.new(mock(timeout_ms: 100))
-      SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
-
-      submission = Submission.new(uuid, :ruby, :bob, "git...")
-      submission.expects(:increment_errors!)
-      submission.expects(:errored_too_many_times?).returns(true)
-      assert runner.process_submission(submission)
+      runner.process_submission(submission)
     end
   end
 end

@@ -1,6 +1,7 @@
 module Orchestrator
-
   class TestRun
+    attr_reader :status_code
+
     def initialize(submission_uuid, data)
       @submission_uuid = submission_uuid
       @status_code = data&.fetch("status", nil)&.fetch("status_code", nil).to_i
@@ -44,7 +45,7 @@ module Orchestrator
     end
 
     private
-    attr_reader :data, :submission_uuid, :status_code, :status_message, :results
+    attr_reader :data, :submission_uuid, :status_message, :results
 
     SUCCESS = 200
 

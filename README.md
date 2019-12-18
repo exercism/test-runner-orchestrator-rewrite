@@ -1,6 +1,6 @@
 # Test Runner Orchestrator
 
-An Orchestrator for Exercism's test runners
+An Orchestrator for Exercism's test runners.
 
 ## Run in development
 

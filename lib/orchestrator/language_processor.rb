@@ -53,16 +53,38 @@ module Orchestrator
       retry_unknown_error = true
 
       begin
-        num_worker_available_attempts += 1
-        res = test_runner.process_submission(submission)
-        queue.push(submission) unless res
+        Logger.log_submission(submission, "Testing #{submission.num_errored_test_runs + 1}/#{num_worker_available_attempts + 1}")
 
-      # If there are no workers avaliable then let's retry
-      # this a few times ith a backoff between each
-      rescue NoWorkersAvailableError
-        if num_worker_available_attempts < max_worker_available_attempts
-          sleep(backoff_ms / 1000.0)
-          retry
+        num_worker_available_attempts += 1
+        test_runner.process_submission(submission)
+
+      rescue TestRunError => e
+        Logger.log_submission(submission, "Testing failed (#{e.test_run.status_code})")
+
+        # If there are no workers avaliable then let's retry
+        # this a few times ith a backoff between each
+        if e.test_run.no_workers_available?
+          if num_worker_available_attempts < max_worker_available_attempts
+            sleep(backoff_ms / 1000.0)
+            retry
+          end
+        end
+
+        # We've got some sort of error, that's not automatically terminal.
+        # We increment the number of errors on the submission and then
+        # decide if its worth backing off or not.
+        submission.increment_errors!
+
+        # If we've failed too many times then post the result back
+        # otherwise put it back on the queue for next time
+        if submission.errored_too_many_times?
+          Logger.log_submission(submission, "Too many errors. Giving up")
+          e.test_run.post_to_spi!
+          Logger.log_submission(submission, "Alerted SPI")
+        else
+          Logger.log_submission(submission, "Errored. Requeuing")
+          queue.push(submission)
+          Logger.log_submission(submission, "Requeued successfully")
         end
 
       # If we get to this rescue then something pretty

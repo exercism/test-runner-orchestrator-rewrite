@@ -1,3 +1,5 @@
+ENV["APP_ENV"] ||= "development"
+
 require 'erb'
 require "mandate"
 require 'rbczmq'
@@ -17,18 +19,25 @@ require "orchestrator/exceptions"
 require "orchestrator/language"
 require "orchestrator/language_settings"
 require "orchestrator/language_processor"
-require "orchestrator/platform_connection"
 require "orchestrator/queue"
 require "orchestrator/spi_client"
 require "orchestrator/submission"
 require "orchestrator/test_run"
 require "orchestrator/test_runner"
 
+%w{
+  platform_connection
+}.each do |lib|
+  lib = ENV["APP_ENV"] == "development" ? "orchestrator/stubs/#{lib}" :
+                                          "orchestrator/#{lib}"
+  require lib
+end
+
 require "orchestrator/http/app"
 
 module Orchestrator
   def self.env
-    @env ||= (ENV["APP_ENV"] || "development")
+    @env ||= ENV["APP_ENV"]
   end
 
   def self.application

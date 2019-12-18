@@ -2,15 +2,19 @@ module Orchestrator
   class Submission
     attr_reader :uuid, :language, :exercise, :container_slug
     def initialize(uuid, language, exercise, container_slug = nil)
+      @uuid = uuid
       @language = language.to_sym
       @exercise = exercise.to_sym
-      @uuid = uuid
       @container_slug = container_slug
-      @num_errored_test_runs = 0
+      @num_errored_test_runs_atom = Concurrent::Atom.new(0)
+    end
+
+    def num_errored_test_runs
+      num_errored_test_runs_atom.value
     end
 
     def increment_errors!
-      self.num_errored_test_runs += 1
+      num_errored_test_runs_atom.swap {|old| old + 1 }
     end
 
     def errored_too_many_times?
@@ -22,6 +26,6 @@ module Orchestrator
     end
 
     protected
-    attr_accessor :num_errored_test_runs
+    attr_accessor :num_errored_test_runs_atom
   end
 end
