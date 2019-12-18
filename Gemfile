@@ -20,3 +20,5 @@ gem 'mandate'
 gem 'rbczmq'
 
 gem 'parallel'
+
+gem 'rack-test'

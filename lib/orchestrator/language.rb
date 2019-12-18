@@ -8,17 +8,32 @@ module Orchestrator
 
     def initialize(settings_hash)
       @queue = Queue.new
-      @processors = []
+      @processors_mvar = Concurrent::MVar.new([])
       @settings = LanguageSettings.new(settings_hash)
-    end
-
-    def add_processor
-      lp = LanguageProcessor.run!(queue, settings)
-      processors.push(lp)
     end
 
     def update_settings(data)
       settings.update(data)
+    end
+
+    def scale_processors(new_count)
+      processors_mvar.borrow do |processors|
+        # Let's get this cached for sanity's sake
+        current_count = processors.size
+
+        return if current_count == new_count
+
+        if new_count > current_count
+          (new_count - current_count).times do
+            processors.push(LanguageProcessor.run!(queue, settings))
+          end
+        else
+          processors[0, (current_count - new_count)].each do |processor|
+            processor.exit!
+            processors.delete(processor)
+          end
+        end
+      end
     end
 
     def enqueue_submission(submission)
@@ -30,10 +45,10 @@ module Orchestrator
     end
 
     def num_processors
-      processors.size
+      processors_mvar.borrow(&:size)
     end
 
     private
-    attr_reader :queue, :processors, :settings
+    attr_reader :queue, :processors_mvar, :settings
   end
 end

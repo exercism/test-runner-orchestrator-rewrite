@@ -11,7 +11,6 @@ require "ext/string"
 require "ext/nilclass"
 
 require "orchestrator/logger"
-
 require "orchestrator/application"
 require "orchestrator/exceptions"
 require "orchestrator/language"
@@ -24,8 +23,18 @@ require "orchestrator/submission"
 require "orchestrator/test_run"
 require "orchestrator/test_runner"
 
+require "orchestrator/http/app"
+
 module Orchestrator
   def self.env
-    @env ||= (ENV["ENV"] || "development")
+    @env ||= (ENV["APP_ENV"] || "development")
+  end
+
+  def self.application
+    @application ||= Orchestrator::Application.start!
   end
 end
+
+# Get a new application on this main thread
+# before sinatra or anything else kicks in
+Orchestrator.application

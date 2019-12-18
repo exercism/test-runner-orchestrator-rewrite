@@ -1,4 +1,4 @@
-ENV["ENV"] = "test"
+ENV["APP_ENV"] = "test"
 
 gem "minitest"
 require "minitest/autorun"

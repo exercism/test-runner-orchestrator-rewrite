@@ -8,7 +8,7 @@ module Orchestrator
     end
 
     def update(hash)
-      timeout_ms_atom.reset(hash['timeout_ms'])
+      timeout_ms_atom.reset(hash['timeout_ms'].to_i)
       container_version_atom.reset(hash['container_version'])
     end
 

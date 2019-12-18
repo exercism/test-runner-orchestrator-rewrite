@@ -36,10 +36,8 @@ module Orchestrator
       assert_equal 1, application.num_processors(language: :javascript)
       assert_equal 1, application.num_processors(language: :csharp)
 
-      application.add_processor(language: :ruby)
-      application.add_processor(language: :ruby)
-      application.add_processor(language: :javascript)
-      application.add_processor(language: :ruby)
+      application.scale_processors(language: :ruby, count: 3)
+      application.scale_processors(language: :javascript, count: 2)
 
       assert_equal 3, application.num_processors(language: :ruby)
       assert_equal 2, application.num_processors(language: :javascript)

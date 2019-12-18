@@ -9,6 +9,8 @@ module Orchestrator
     end
 
     def start!
+      return if Orchestrator.env == 'test'
+
       SPIClient.fetch_languages.each do |slug, settings|
         slug = slug.to_sym
         add_language(slug, settings)
@@ -21,36 +23,47 @@ module Orchestrator
           submission["exercise_slug"]
         )
       end
+
+      true
     end
 
     def add_language(slug, settings)
       language = Language.new(settings)
-      settings['num_processors'].times do
-        language.add_processor
-      end
+      language.scale_processors(settings['num_processors'])
 
       borrow_languages do |languages|
-        languages[slug] = language
+        languages[slug.to_sym] = language
       end
+
+      true
     end
 
     def update_language_settings(slug, settings)
-      borrow_language(slug) do |language|
+      borrow_language(slug.to_sym) do |language|
         language.update_settings(settings)
       end
+
+      true
     end
 
     def enqueue_submission(uuid, language_slug, exercise_slug)
+      language_slug = language_slug.to_sym
+      exercise_slug = exercise_slug.to_sym
+
       submission = Submission.new(uuid, language_slug, exercise_slug)
       borrow_language(submission.language) do |lang|
         lang.enqueue_submission(submission)
       end
+
+      true
     end
 
-    def add_processor(language: )
+    def scale_processors(language:, count:)
       borrow_language(language.to_sym) do |lang|
-        lang.add_processor
+        lang.scale_processors(count)
       end
+
+      true
     end
 
     def queue_size(language: )
