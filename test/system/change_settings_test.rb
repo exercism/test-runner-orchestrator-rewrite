@@ -19,9 +19,8 @@ module Orchestrator
       assert_equal 200, last_response.status
 
       application.send(:borrow_language, :ruby) do |lang|
-        settings = lang.send(:settings)
-        assert_equal timeout, settings.timeout_ms
-        assert_equal version, settings.container_version
+        assert_equal timeout, lang.settings.timeout_ms
+        assert_equal version, lang.settings.container_version
       end
     end
   end

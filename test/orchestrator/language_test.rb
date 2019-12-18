@@ -60,8 +60,8 @@ module Orchestrator
       settings_hash = {"timeout_ms" => timeout_ms, "container_version" => container_version}
       language = Language.new(settings_hash)
 
-      assert_equal timeout_ms, language.send(:settings).timeout_ms
-      assert_equal container_version, language.send(:settings).container_version
+      assert_equal timeout_ms, language.settings.timeout_ms
+      assert_equal container_version, language.settings.container_version
     end
   end
 end

@@ -58,8 +58,8 @@ module Orchestrator
       })
 
       application.send(:borrow_language, :ruby) do |lang|
-        assert_equal timeout_ms, lang.send(:settings).timeout_ms
-        assert_equal container_version, lang.send(:settings).container_version
+        assert_equal timeout_ms, lang.settings.timeout_ms
+        assert_equal container_version, lang.settings.container_version
       end
 
       new_timeout_ms = 987663
@@ -71,8 +71,8 @@ module Orchestrator
       })
 
       application.send(:borrow_language, :ruby) do |lang|
-        assert_equal new_timeout_ms, lang.send(:settings).timeout_ms
-        assert_equal new_container_version, lang.send(:settings).container_version
+        assert_equal new_timeout_ms, lang.settings.timeout_ms
+        assert_equal new_container_version, lang.settings.container_version
       end
     end
 
