@@ -9,12 +9,16 @@ module Orchestrator
     def initialize(settings_hash)
       @queue = Queue.new
       @processors = []
-      @settings = LanguageSettings.from_hash(settings_hash)
+      @settings = LanguageSettings.new(settings_hash)
     end
 
     def add_processor
       lp = LanguageProcessor.run!(queue, settings)
       processors.push(lp)
+    end
+
+    def update_settings(data)
+      settings.update(data)
     end
 
     def enqueue_submission(submission)

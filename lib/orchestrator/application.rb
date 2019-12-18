@@ -13,6 +13,14 @@ module Orchestrator
         slug = slug.to_sym
         add_language(slug, settings)
       end
+
+      SPIClient.fetch_submissions_to_test.each do |submission|
+        enqueue_submission(
+          submission["uuid"],
+          submission["language_slug"],
+          submission["exercise_slug"]
+        )
+      end
     end
 
     def add_language(slug, settings)
@@ -26,8 +34,14 @@ module Orchestrator
       end
     end
 
-    def enqueue_submission(language_slug, exercise_slug, submission_uuid)
-      submission = Submission.new(language_slug, exercise_slug, submission_uuid)
+    def update_language_settings(slug, settings)
+      borrow_language(slug) do |language|
+        language.update_settings(settings)
+      end
+    end
+
+    def enqueue_submission(uuid, language_slug, exercise_slug)
+      submission = Submission.new(uuid, language_slug, exercise_slug)
       borrow_language(submission.language) do |lang|
         lang.enqueue_submission(submission)
       end

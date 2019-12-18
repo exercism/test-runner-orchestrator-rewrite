@@ -30,7 +30,7 @@ module Orchestrator
 
     def test_runs_a_submission_correctly
       stub_spi_client!
-      submission = Submission.new(:ruby, :bob, "023949s9dads")
+      submission = Submission.new("023949s9dads", :ruby, :bob)
       queue = Queue.new
       queue.push(submission)
 
@@ -47,7 +47,7 @@ module Orchestrator
 
     def test_requeues_if_run_fails
       stub_spi_client!
-      submission = Submission.new(:ruby, :bob, "023949s9dads")
+      submission = Submission.new("023949s9dads", :ruby, :bob)
       queue = Queue.new
       queue.push(submission)
       queue.expects(:push).with(submission)
@@ -77,7 +77,7 @@ module Orchestrator
     def test_no_worker_loop
       stub_spi_client!
 
-      submission = Submission.new(:ruby, :bob, "foobar-1")
+      submission = Submission.new("foobar-1", :ruby, :bob)
 
       test_runner = stub_test_runner!
       test_runner.expects(:process_submission).times(40).with(submission).raises(NoWorkersAvailableError)
@@ -91,7 +91,7 @@ module Orchestrator
     def test_bad_exception_loop
       stub_spi_client!
 
-      submission = Submission.new(:ruby, :bob, "foobar")
+      submission = Submission.new("foobar", :ruby, :bob)
 
       queue = mock
       queue.expects(:push).with(submission)

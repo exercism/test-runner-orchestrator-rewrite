@@ -3,10 +3,10 @@ require 'test_helper'
 module Orchestrator
   class QueueTest < Minitest::Test
     def test_enqueing_and_retrieving
-      ruby_two_fer_1 = Submission.new(:ruby, :two_fer, 1)
-      ruby_two_fer_2 = Submission.new(:ruby, :two_fer, 2)
-      ruby_two_fer_3 = Submission.new(:ruby, :two_fer, 3)
-      ruby_two_fer_4 = Submission.new(:ruby, :two_fer, 4)
+      ruby_two_fer_1 = Submission.new(1, :ruby, :two_fer)
+      ruby_two_fer_2 = Submission.new(2, :ruby, :two_fer)
+      ruby_two_fer_3 = Submission.new(3, :ruby, :two_fer)
+      ruby_two_fer_4 = Submission.new(4, :ruby, :two_fer)
 
       queue = Queue.new
       queue.push(ruby_two_fer_1)

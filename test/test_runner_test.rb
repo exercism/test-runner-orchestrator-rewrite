@@ -12,7 +12,7 @@ module Orchestrator
       timeout = 2000
 
       container_version = "git-123asd"
-      submission = Submission.new(language, exercise, uuid, container_version)
+      submission = Submission.new(uuid, language, exercise, container_version)
 
       conn = stub_platform_connection!
       conn.expects(:run_tests).with(language, exercise, s3_uri, container_version, timeout)
@@ -29,9 +29,9 @@ module Orchestrator
       uuid = "023949s9dads"
       s3_uri = "s3://test-exercism-submissions/test/testing/#{uuid}"
 
-      submission_with_nil = Submission.new(language, exercise, uuid, nil)
-      submission_with_blank = Submission.new(language, exercise, uuid, "")
-      submission_with_none = Submission.new(language, exercise, uuid)
+      submission_with_nil = Submission.new(uuid, language, exercise, nil)
+      submission_with_blank = Submission.new(uuid, language, exercise, "")
+      submission_with_none = Submission.new(uuid, language, exercise)
 
       container_version = "git-123asd"
       timeout = 2000
@@ -40,8 +40,8 @@ module Orchestrator
       conn.expects(:run_tests).with(language, exercise, s3_uri, container_version, timeout).times(3)
 
       settings = LanguageSettings.new(
-        timeout_ms: timeout,
-        container_version: container_version
+        'timeout_ms' => timeout,
+        'container_version' => container_version
       )
       test_runner = TestRunner.new(settings)
       test_runner.process_submission(submission_with_nil)
@@ -59,7 +59,7 @@ module Orchestrator
 
       runner = TestRunner.new(mock(timeout_ms: 100))
       assert_raises(NoWorkersAvailableError) do
-        runner.process_submission(Submission.new(:ruby, :bob, 123, "git..."))
+        runner.process_submission(Submission.new(123, :ruby, :bob, "git..."))
       end
     end
 
@@ -80,7 +80,7 @@ module Orchestrator
       runner = TestRunner.new(mock(timeout_ms: 100))
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
-      submission = Submission.new(:ruby, :bob, uuid, "git...")
+      submission = Submission.new(uuid, :ruby, :bob, "git...")
       assert runner.process_submission(submission)
     end
 
@@ -101,7 +101,7 @@ module Orchestrator
       runner = TestRunner.new(mock(timeout_ms: 100))
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
-      submission = Submission.new(:ruby, :bob, uuid, "git...")
+      submission = Submission.new(uuid, :ruby, :bob, "git...")
       assert runner.process_submission(submission)
     end
 
@@ -113,7 +113,7 @@ module Orchestrator
 
       runner = TestRunner.new(mock(timeout_ms: 100))
 
-      submission = Submission.new(:ruby, :bob, nil, "git...")
+      submission = Submission.new(nil, :ruby, :bob, "git...")
 
       assert_raises NoWorkersAvailableError do
         runner.process_submission(submission)
@@ -128,7 +128,7 @@ module Orchestrator
 
       runner = TestRunner.new(mock(timeout_ms: 100))
 
-      submission = Submission.new(:ruby, :bob, nil, "git...")
+      submission = Submission.new(nil, :ruby, :bob, "git...")
       submission.expects(:increment_errors!)
       submission.expects(:errored_too_many_times?).returns(false)
       refute runner.process_submission(submission)
@@ -151,7 +151,7 @@ module Orchestrator
       runner = TestRunner.new(mock(timeout_ms: 100))
       SPIClient.expects(:post_test_run).with(uuid, status_code, message, results)
 
-      submission = Submission.new(:ruby, :bob, uuid, "git...")
+      submission = Submission.new(uuid, :ruby, :bob, "git...")
       submission.expects(:increment_errors!)
       submission.expects(:errored_too_many_times?).returns(true)
       assert runner.process_submission(submission)

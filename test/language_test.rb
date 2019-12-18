@@ -5,8 +5,8 @@ module Orchestrator
     def test_queues
       language = Language.new(timeout_ms: nil, container_version: nil)
 
-      ruby_submission_1 = Submission.new(:ruby, :two_fer, 1)
-      ruby_submission_2 = Submission.new(:ruby, :two_fer, 2)
+      ruby_submission_1 = Submission.new(1, :ruby, :two_fer)
+      ruby_submission_2 = Submission.new(2, :ruby, :two_fer)
 
       language.enqueue_submission(ruby_submission_1)
       assert_equal 1, language.queue_size
