@@ -14,7 +14,7 @@ module Orchestrator
     end
 
     def errored_too_many_times?
-      false
+      num_errored_test_runs > 2
     end
 
     # TODO - Extract this to some helper builder method
