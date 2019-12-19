@@ -13,23 +13,6 @@ module Orchestrator
       @socket = open_socket
     end
 
-    private
-    attr_reader :address, :socket
-
-    def open_socket
-      # Although this is never used outside of this method,
-      # it must be set as an instance variable so that it
-      # doesn't get garbage collected accidently.
-
-      socket = PlatformConnection.zmq_context.borrow do |context|
-        context.socket(ZMQ::REQ)
-      end
-
-      socket.linger = 1
-      socket.connect(address)
-      socket
-    end
-
     def run_tests(track_slug, exercise_slug, s3_uri, container_slug, timeout_ms)
       test_run_id = "test-#{Time.now.to_i}"
       params = {
@@ -92,6 +75,23 @@ module Orchestrator
           }
         }
       end
+    end
+
+    private
+    attr_reader :address, :socket
+
+    def open_socket
+      # Although this is never used outside of this method,
+      # it must be set as an instance variable so that it
+      # doesn't get garbage collected accidently.
+
+      socket = PlatformConnection.zmq_context.borrow do |context|
+        context.socket(ZMQ::REQ)
+      end
+
+      socket.linger = 1
+      socket.connect(address)
+      socket
     end
   end
 end
