@@ -24,7 +24,6 @@ module Orchestrator
     # internals but it's also caught lots of integration
     # errors between all the pieces so I'm ok with it for now.
     def test_add_language_proxies
-      stub_platform_connection!(times: 6)
       stub_language_processor_run!(times: 6)
 
       application = Application.new
@@ -77,7 +76,6 @@ module Orchestrator
     end
 
     def test_status
-      stub_platform_connection!(times: 5)
       stub_language_processor_run!(times: 5)
 
       application = Application.new
@@ -124,7 +122,6 @@ module Orchestrator
     # internals but it's also caught lots of integration
     # errors between all the pieces so I'm ok with it for now.
     def test_add_language_proxies
-      stub_platform_connection!(times: 6)
       stub_language_processor_run!(times: 6)
 
       application = Application.new

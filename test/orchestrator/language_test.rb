@@ -18,7 +18,6 @@ module Orchestrator
     def test_scaling_language_processors_from_zero
       language = Language.new(timeout_ms: nil, container_slug: nil)
 
-      stub_platform_connection!(times: 2)
       stub_language_processor_run!(times: 2)
 
       language.scale_processors(2)
@@ -28,12 +27,10 @@ module Orchestrator
     def test_scaling_language_processors_up
       language = Language.new(timeout_ms: nil, container_slug: nil)
 
-      stub_platform_connection!(times: 1)
       stub_language_processor_run!(times: 1)
       language.scale_processors(1)
       assert_equal 1, language.num_processors
 
-      stub_platform_connection!(times: 2)
       stub_language_processor_run!(times: 2)
       language.scale_processors(3)
       assert_equal 3, language.num_processors
@@ -44,7 +41,6 @@ module Orchestrator
 
       Orchestrator::LanguageProcessor.any_instance.expects(:exit!).twice
 
-      stub_platform_connection!(times: 3)
       stub_language_processor_run!(times: 3)
 
       language.scale_processors(3)

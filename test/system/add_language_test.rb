@@ -3,7 +3,7 @@ require_relative 'base'
 module Orchestrator
   class AddLanguageTest < SystemBaseTestCase
     def test_adds_langauge_successfully
-      stub_platform_connection!(times: 2)
+      stub_language_processor_run!(times: 2)
       application = Orchestrator.application
 
       timeout_ms = 1234

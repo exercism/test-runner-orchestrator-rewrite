@@ -8,6 +8,8 @@ module Orchestrator
 
     def run!
       Thread.new do
+        @platform_connection = PlatformConnection.new
+
         loop do
           submission_found = process_next_submission!
 
@@ -37,7 +39,6 @@ module Orchestrator
       @queue = queue
       @monitor = monitor
       @settings = settings
-      @platform_connection = PlatformConnection.new
       @should_exit = Concurrent::AtomicBoolean.new(false)
     end
 

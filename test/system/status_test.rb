@@ -3,7 +3,6 @@ require_relative 'base'
 module Orchestrator
   class StatusTest < SystemBaseTestCase
     def test_status
-      stub_platform_connection!(times: 5)
       stub_language_processor_run!(times: 5)
 
       application.add_language(:ruby, {'timeout_ms' => '100', 'container_slug' => 'cv_ruby', 'num_processors' => 2})
