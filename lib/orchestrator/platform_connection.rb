@@ -26,7 +26,7 @@ module Orchestrator
       params[:execution_timeout] = timeout_ms / 1000.0
       client_timeout = timeout_ms + 2000
 
-      send_msg(params, client_timeout)
+      send_msg(params.to_json, client_timeout)
     end
 
     def send_msg(json, timeout_ms)
