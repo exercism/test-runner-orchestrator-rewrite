@@ -18,11 +18,22 @@ class SubmissionsReceiverApp < Sinatra::Base
     json received: :ok
   end
 
+  post '/languages/:language_slug' do
+    Orchestrator.application.add_language(
+      params[:language_slug],
+      params[:settings]
+    )
+
+    json received: :ok
+  end
+
   patch '/languages/:language_slug/settings' do
     Orchestrator.application.update_language_settings(
       params[:language_slug],
       params[:settings]
     )
+
+    json received: :ok
   end
 
   patch '/languages/:language_slug/scale/:count' do
@@ -30,6 +41,8 @@ class SubmissionsReceiverApp < Sinatra::Base
       language: params[:language_slug],
       count: params[:count].to_i
     )
+
+    json received: :ok
   end
 
   get '/status' do

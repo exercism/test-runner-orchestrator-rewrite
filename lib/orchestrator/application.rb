@@ -29,7 +29,7 @@ module Orchestrator
 
     def add_language(slug, settings)
       language = Language.new(settings)
-      language.scale_processors(settings['num_processors'])
+      language.scale_processors(settings['num_processors'].to_i)
 
       borrow_languages do |languages|
         languages[slug.to_sym] = language
