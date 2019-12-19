@@ -15,4 +15,4 @@ It will then sit and wait for messages from the website.
 
 ## Copyright
 
-All content in this repository is Copyright to Exercism and licenced under MIT.
+All content in this repository is copyright to Exercism and licenced under MIT.
