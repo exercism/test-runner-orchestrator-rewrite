@@ -95,6 +95,7 @@ module Orchestrator
       log("Exception while running tests (#{retry_unknown_error ? "first" : "second"} time)")
       log(e.class.name)
       log(e.message)
+      log(e.backtrace.join("\n"))
       log("------")
 
       if retry_unknown_error
