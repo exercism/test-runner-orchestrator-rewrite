@@ -12,7 +12,7 @@ module Orchestrator
       @socket = open_socket
     end
 
-    def run_tests(track_slug, exercise_slug, s3_uri, container_slug, timeout_ms)
+    def run_tests(track_slug, exercise_slug, s3_uri, version_slug, timeout_ms)
       test_run_id = "test-#{Time.now.to_i}"
       params = {
         action: :test_solution,
@@ -20,7 +20,7 @@ module Orchestrator
         track_slug: track_slug,
         exercise_slug: exercise_slug,
         s3_uri: s3_uri,
-        container_version: container_slug
+        container_version: version_slug
       }
       params[:execution_timeout] = timeout_ms / 1000.0
       client_timeout = timeout_ms + 2000

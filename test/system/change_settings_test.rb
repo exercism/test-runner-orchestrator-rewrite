@@ -12,7 +12,7 @@ module Orchestrator
       patch '/languages/ruby/settings', {
         settings: {
           timeout_ms: timeout,
-          container_slug: cotnainer_slug
+          version_slug: cotnainer_slug
         }
       }
 
@@ -20,7 +20,7 @@ module Orchestrator
 
       application.send(:borrow_language, :ruby) do |lang|
         assert_equal timeout, lang.settings.timeout_ms
-        assert_equal cotnainer_slug, lang.settings.container_slug
+        assert_equal cotnainer_slug, lang.settings.version_slug
       end
     end
   end

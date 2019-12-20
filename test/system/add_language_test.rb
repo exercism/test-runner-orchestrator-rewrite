@@ -7,12 +7,12 @@ module Orchestrator
       application = Orchestrator.application
 
       timeout_ms = 1234
-      container_slug = "git://some_slug"
+      version_slug = "git://some_slug"
 
       post '/languages/ruby', {
         settings: {
           timeout_ms: timeout_ms,
-          container_slug: container_slug,
+          version_slug: version_slug,
           num_processors: 2
         }
       }
@@ -20,7 +20,7 @@ module Orchestrator
 
       application.send(:borrow_language, :ruby) do |lang|
         assert_equal timeout_ms, lang.settings.timeout_ms
-        assert_equal container_slug, lang.settings.container_slug
+        assert_equal version_slug, lang.settings.version_slug
       end
       assert_equal 2, application.num_processors(language: :ruby)
     end
