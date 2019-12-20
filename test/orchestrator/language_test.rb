@@ -3,7 +3,7 @@ require 'test_helper'
 module Orchestrator
   class LanguageTest < Minitest::Test
     def test_queues
-      language = Language.new(timeout_ms: nil, container_slug: nil)
+      language = Language.new(:ruby, timeout_ms: nil, container_slug: nil)
 
       ruby_submission_1 = Submission.new(1, :ruby, :two_fer)
       ruby_submission_2 = Submission.new(2, :ruby, :two_fer)
@@ -16,7 +16,7 @@ module Orchestrator
     end
 
     def test_scaling_language_processors_from_zero
-      language = Language.new(timeout_ms: nil, container_slug: nil)
+      language = Language.new(:ruby, timeout_ms: nil, container_slug: nil)
 
       stub_language_processor_run!(times: 2)
 
@@ -25,7 +25,7 @@ module Orchestrator
     end
 
     def test_scaling_language_processors_up
-      language = Language.new(timeout_ms: nil, container_slug: nil)
+      language = Language.new(:ruby, timeout_ms: nil, container_slug: nil)
 
       stub_language_processor_run!(times: 1)
       language.scale_processors(1)
@@ -37,7 +37,7 @@ module Orchestrator
     end
 
     def test_scaling_language_processors_down
-      language = Language.new(timeout_ms: nil, container_slug: nil)
+      language = Language.new(:ruby, timeout_ms: nil, container_slug: nil)
 
       Orchestrator::LanguageProcessor.any_instance.expects(:exit!).twice
 
@@ -54,7 +54,7 @@ module Orchestrator
       timeout_ms = 1000
       container_slug = "asdasdas"
       settings_hash = {"timeout_ms" => timeout_ms, "container_slug" => container_slug}
-      language = Language.new(settings_hash)
+      language = Language.new(:ruby, settings_hash)
 
       assert_equal timeout_ms, language.settings.timeout_ms
       assert_equal container_slug, language.settings.container_slug

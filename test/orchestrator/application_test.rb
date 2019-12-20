@@ -95,7 +95,7 @@ module Orchestrator
           queue_size: 2,
           settings: {
             timeout_ms: 100,
-            container_slug: "cv_ruby"
+            version_slug: "cv_ruby"
           }
         },
         javascript: {
@@ -103,7 +103,7 @@ module Orchestrator
           queue_size: 2,
           settings: {
             timeout_ms: 200,
-            container_slug: "cv_js"
+            version_slug: "cv_js"
           }
         },
         csharp: {
@@ -111,7 +111,7 @@ module Orchestrator
           queue_size: 1,
           settings: {
             timeout_ms: 300,
-            container_slug: "cv_c#"
+            version_slug: "cv_c#"
           }
         }
       }

@@ -5,6 +5,10 @@ require "sinatra/base"
 require "sinatra/json"
 
 class SubmissionsReceiverApp < Sinatra::Base
+  get '/status' do
+    json Orchestrator.application.status
+  end
+
   post '/submissions' do
     submission_uuid = params[:submission_uuid]
     Logger.log_submission(submission_uuid, "Queuing")
@@ -45,7 +49,21 @@ class SubmissionsReceiverApp < Sinatra::Base
     json received: :ok
   end
 
-  get '/status' do
-    json Orchestrator.application.status
+  post '/languages/:language_slug/versions' do
+    Orchestrator.application.build_version(
+      language: params[:language_slug],
+      slug: params[:version][:slug],
+    )
+
+    json received: :ok
+  end
+
+  patch '/languages/:language_slug/versions/:version_slug/deploy' do
+    Orchestrator.application.deploy_version(
+      language: params[:language_slug],
+      slug: params[:version_slug],
+    )
+
+    json received: :ok
   end
 end

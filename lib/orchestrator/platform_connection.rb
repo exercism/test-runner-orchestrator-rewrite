@@ -4,9 +4,8 @@ module Orchestrator
     ADDRESS = "tcp://analysis-router.exercism.io:5555"
 
     # TODO: Would this be safer as a constant?
-    def self.zmq_context
-      @zmq_context ||= Concurrent::MVar.new(ZMQ::Context.new(1))
-    end
+    # TODO - Yes it would!
+    ZMQ_CONTEXT = Concurrent::MVar.new(ZMQ::Context.new(1))
 
     def initialize(address: ADDRESS)
       @address = address
@@ -27,6 +26,26 @@ module Orchestrator
       client_timeout = timeout_ms + 2000
 
       send_msg(params.to_json, client_timeout)
+    end
+
+    def build_version(language_slug, version_slug)
+      params = {
+        channel: :test_runners,
+        action: :build_container,
+        track_slug: language_slug,
+        git_reference: version_slug
+      }
+      result = send_msg(params.to_json, 1_000)
+    end
+
+    def deploy_version(language_slug, version_slug)
+      params = {
+        action: :deploy_container_version,
+        track_slug: language_slug,
+        channel: "test_runners",
+        new_version: "git-#{version_slug}"
+      }
+      result = send_msg(params.to_json, 1_000)
     end
 
     def send_msg(json, timeout_ms)
@@ -85,7 +104,7 @@ module Orchestrator
       # it must be set as an instance variable so that it
       # doesn't get garbage collected accidently.
 
-      socket = PlatformConnection.zmq_context.borrow do |context|
+      socket = ZMQ_CONTEXT.borrow do |context|
         context.socket(ZMQ::REQ)
       end
 

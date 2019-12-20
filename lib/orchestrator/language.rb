@@ -6,7 +6,8 @@ module Orchestrator
   class Language
     attr_reader :settings
 
-    def initialize(settings_hash)
+    def initialize(slug, settings_hash)
+      @slug = slug
       @queue = Queue.new
       @processors_mvar = Concurrent::MVar.new([])
       @settings = LanguageSettings.new(settings_hash)
@@ -42,6 +43,14 @@ module Orchestrator
       queue.push(submission)
     end
 
+    def build_version(version_slug)
+      PlatformConnection.new.build_version(slug, version_slug)
+    end
+
+    def deploy_version(version_slug)
+      PlatformConnection.new.deploy_version(slug, version_slug)
+    end
+
     def queue_size
       queue.size
     end
@@ -51,6 +60,6 @@ module Orchestrator
     end
 
     private
-    attr_reader :queue, :monitor, :processors_mvar
+    attr_reader :slug, :queue, :monitor, :processors_mvar, :mangagement_platform_connection
   end
 end
