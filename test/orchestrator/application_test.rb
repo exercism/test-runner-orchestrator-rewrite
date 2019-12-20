@@ -149,12 +149,12 @@ module Orchestrator
       Application.new.build_version(language: language_slug, version_slug: version_slug)
     end
 
-    def test_deploy_version
+    def test_deploy_versions
       language_slug = "python"
-      version_slug = "12321312312321"
-      PlatformConnection.any_instance.expects(:deploy_version).with(language_slug, version_slug)
+      version_slugs = ["12321312312321", "qweqwewq"]
+      PlatformConnection.any_instance.expects(:deploy_versions).with(language_slug, version_slugs)
 
-      Application.new.deploy_version(language: language_slug, version_slug: version_slug)
+      Application.new.deploy_versions(language: language_slug, version_slugs: version_slugs)
     end
 
   end

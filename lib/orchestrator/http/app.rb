@@ -58,10 +58,10 @@ class SubmissionsReceiverApp < Sinatra::Base
     json received: :ok
   end
 
-  patch '/languages/:language_slug/versions/:version_slug/deploy' do
-    Orchestrator.application.deploy_version(
+  patch '/languages/:language_slug/versions/deploy' do
+    Orchestrator.application.deploy_versions(
       language: params[:language_slug],
-      version_slug: params[:version_slug],
+      version_slugs: params[:version_slugs],
     )
 
     json received: :ok

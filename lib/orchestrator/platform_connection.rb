@@ -38,12 +38,12 @@ module Orchestrator
       result = send_msg(params.to_json, 1_000)
     end
 
-    def deploy_version(language_slug, version_slug)
+    def deploy_versions(language_slug, version_slugs)
       params = {
-        action: :deploy_container_version,
-        track_slug: language_slug,
+        action: "update_container_versions",
         channel: "test_runners",
-        new_version: "git-#{version_slug}"
+        track_slug: language_slug,
+        versions: version_slugs
       }
       result = send_msg(params.to_json, 1_000)
     end

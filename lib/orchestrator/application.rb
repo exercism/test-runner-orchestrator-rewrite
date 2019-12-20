@@ -97,8 +97,8 @@ module Orchestrator
       PlatformConnection.new.build_version(language, version_slug)
     end
 
-    def deploy_version(language:, version_slug:)
-      PlatformConnection.new.deploy_version(language, version_slug)
+    def deploy_versions(language:, version_slugs:)
+      PlatformConnection.new.deploy_versions(language, version_slugs)
     end
 
     private
