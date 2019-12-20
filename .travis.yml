@@ -1,5 +1,6 @@
 dist: xenial
 language: ruby
+cache: bundler
 rvm:
   - 2.6
 before_install:
