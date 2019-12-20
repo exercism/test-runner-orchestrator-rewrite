@@ -43,14 +43,6 @@ module Orchestrator
       queue.push(submission)
     end
 
-    def build_version(version_slug)
-      PlatformConnection.new.build_version(slug, version_slug)
-    end
-
-    def deploy_version(version_slug)
-      PlatformConnection.new.deploy_version(slug, version_slug)
-    end
-
     def queue_size
       queue.size
     end

@@ -52,7 +52,7 @@ class SubmissionsReceiverApp < Sinatra::Base
   post '/languages/:language_slug/versions' do
     Orchestrator.application.build_version(
       language: params[:language_slug],
-      slug: params[:version][:slug],
+      version_slug: params[:version][:slug],
     )
 
     json received: :ok
@@ -61,7 +61,7 @@ class SubmissionsReceiverApp < Sinatra::Base
   patch '/languages/:language_slug/versions/:version_slug/deploy' do
     Orchestrator.application.deploy_version(
       language: params[:language_slug],
-      slug: params[:version_slug],
+      version_slug: params[:version_slug],
     )
 
     json received: :ok

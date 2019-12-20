@@ -141,6 +141,22 @@ module Orchestrator
       assert_equal 1, application.num_processors(language: :csharp)
     end
 
+    def test_build_version
+      language_slug = "python"
+      version_slug = "12321312312321"
+      PlatformConnection.any_instance.expects(:build_version).with(language_slug, version_slug)
+
+      Application.new.build_version(language: language_slug, version_slug: version_slug)
+    end
+
+    def test_deploy_version
+      language_slug = "python"
+      version_slug = "12321312312321"
+      PlatformConnection.any_instance.expects(:deploy_version).with(language_slug, version_slug)
+
+      Application.new.deploy_version(language: language_slug, version_slug: version_slug)
+    end
+
   end
 end
 

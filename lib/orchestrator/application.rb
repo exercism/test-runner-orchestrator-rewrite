@@ -93,16 +93,12 @@ module Orchestrator
       end
     end
 
-    def build_version(language:, slug:)
-      borrow_language(language.to_sym) do |lang|
-        lang.build_version(slug)
-      end
+    def build_version(language:, version_slug:)
+      PlatformConnection.new.build_version(language, version_slug)
     end
 
-    def deploy_version(language:, slug:)
-      borrow_language(language.to_sym) do |lang|
-        lang.deploy_version(slug)
-      end
+    def deploy_version(language:, version_slug:)
+      PlatformConnection.new.deploy_version(language, version_slug)
     end
 
     private
