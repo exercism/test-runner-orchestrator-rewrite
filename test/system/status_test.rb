@@ -5,9 +5,9 @@ module Orchestrator
     def test_status
       stub_language_processor_run!(times: 5)
 
-      application.add_language(:ruby, {'timeout_ms' => '100', 'container_slug' => 'cv_ruby', 'num_processors' => 2})
-      application.add_language(:javascript, {'timeout_ms'=> '200', 'container_slug' => 'cv_js', 'num_processors' => 3})
-      application.add_language(:csharp, {'timeout_ms'=> '300', 'container_slug' => 'cv_c#', 'num_processors' => 0})
+      application.add_language(:ruby, {'timeout_ms' => '100', 'version_slug' => 'cv_ruby', 'num_processors' => 2})
+      application.add_language(:javascript, {'timeout_ms'=> '200', 'version_slug' => 'cv_js', 'num_processors' => 3})
+      application.add_language(:csharp, {'timeout_ms'=> '300', 'version_slug' => 'cv_c#', 'num_processors' => 0})
 
       application.enqueue_submission(1, :ruby, :two_fer)
       application.enqueue_submission(2, :ruby, :two_fer)
@@ -24,7 +24,7 @@ module Orchestrator
           queue_size: 2,
           settings: {
             timeout_ms: 100,
-            container_slug: "cv_ruby"
+            version_slug: "cv_ruby"
           }
         },
         javascript: {
@@ -32,7 +32,7 @@ module Orchestrator
           queue_size: 2,
           settings: {
             timeout_ms: 200,
-            container_slug: "cv_js"
+            version_slug: "cv_js"
           }
         },
         csharp: {
@@ -40,7 +40,7 @@ module Orchestrator
           queue_size: 1,
           settings: {
             timeout_ms: 300,
-            container_slug: "cv_c#"
+            version_slug: "cv_c#"
           }
         }
       }.to_json

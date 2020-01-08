@@ -2,7 +2,7 @@ require 'test_helper'
 
 module Orchestrator
   class TestRunnerTest < Minitest::Test
-    def test_uses_submission_container_slug
+    def test_uses_submission_version_slug
       stub_spi_client!
 
       language = :ruby
@@ -11,18 +11,18 @@ module Orchestrator
       s3_uri = "s3://test-exercism-submissions/test/testing/#{uuid}"
       timeout = 2000
 
-      container_slug = "git-123asd"
-      submission = Submission.new(uuid, language, exercise, container_slug)
+      version_slug = "git-123asd"
+      submission = Submission.new(uuid, language, exercise, version_slug)
 
       success_data = JSON.parse({status: {status_code: 200}}.to_json)
       conn = mock
-      conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout).returns(success_data)
+      conn.expects(:run_tests).with(language, exercise, s3_uri, version_slug, timeout).returns(success_data)
 
       test_runner = TestRunner.new(submission, conn, mock(timeout_ms: timeout))
       test_runner.test!
     end
 
-    def test_uses_default_container_slug
+    def test_uses_default_version_slug
       stub_spi_client!
 
       language = :ruby
@@ -34,16 +34,16 @@ module Orchestrator
       submission_with_blank = Submission.new(uuid, language, exercise, "")
       submission_with_none = Submission.new(uuid, language, exercise)
 
-      container_slug = "git-123asd"
+      version_slug = "git-123asd"
       timeout = 2000
 
       success_data = JSON.parse({status: {status_code: 200}}.to_json)
       conn = mock
-      conn.expects(:run_tests).with(language, exercise, s3_uri, container_slug, timeout).times(3).returns(success_data)
+      conn.expects(:run_tests).with(language, exercise, s3_uri, version_slug, timeout).times(3).returns(success_data)
 
       settings = LanguageSettings.new(
         'timeout_ms' => timeout,
-        'container_slug' => container_slug
+        'version_slug' => version_slug
       )
 
       TestRunner.new(submission_with_nil, conn, settings).test!
@@ -57,14 +57,14 @@ module Orchestrator
       @message = "message"
       @results = {"foo" => "bar"}
       @timeout = 12312
-      @container_slug = "foobar123"
+      @version_slug = "foobar123"
       @s3_uri = "s3://test-exercism-submissions/test/testing/#{@uuid}"
 
       @submission = Submission.new(@uuid, :ruby, :bob)
 
       @settings = LanguageSettings.new(
         'timeout_ms' => @timeout,
-        'container_slug' => @container_slug
+        'version_slug' => @version_slug
       )
 
       @pc_data = {
@@ -78,7 +78,7 @@ module Orchestrator
     def test_works_with_200
       stub_data(200)
 
-      @platform_connection.expects(:run_tests).with(:ruby, :bob, @s3_uri, @container_slug, @timeout).returns(@pc_data)
+      @platform_connection.expects(:run_tests).with(:ruby, :bob, @s3_uri, @version_slug, @timeout).returns(@pc_data)
       Orchestrator::SPIClient.expects(:post_test_run).with(@uuid, 200, @message, @results)
 
       assert_equal [true, 200], TestRunner.new(@submission, @platform_connection, @settings).test!
@@ -87,7 +87,7 @@ module Orchestrator
     def test_works_with_400
       stub_data(400)
 
-      @platform_connection.expects(:run_tests).with(:ruby, :bob, @s3_uri, @container_slug, @timeout).returns(@pc_data)
+      @platform_connection.expects(:run_tests).with(:ruby, :bob, @s3_uri, @version_slug, @timeout).returns(@pc_data)
       Orchestrator::SPIClient.expects(:post_test_run).with(@uuid, 400, @message, @results)
 
       assert_equal [true, 400], TestRunner.new(@submission, @platform_connection, @settings).test!
@@ -98,7 +98,7 @@ module Orchestrator
 
       @submission.expects(:increment_errors!)
       @submission.expects(:errored_too_many_times?).returns(false)
-      @platform_connection.expects(:run_tests).times(40).with(:ruby, :bob, @s3_uri, @container_slug, @timeout).returns(@pc_data)
+      @platform_connection.expects(:run_tests).times(40).with(:ruby, :bob, @s3_uri, @version_slug, @timeout).returns(@pc_data)
 
       test_runner = TestRunner.new(@submission, @platform_connection, @settings)
       test_runner.expects(:sleep).times(39).with(0.05)
@@ -110,7 +110,7 @@ module Orchestrator
 
       @submission.expects(:increment_errors!)
       @submission.expects(:errored_too_many_times?).returns(true)
-      @platform_connection.expects(:run_tests).times(40).with(:ruby, :bob, @s3_uri, @container_slug, @timeout).returns(@pc_data)
+      @platform_connection.expects(:run_tests).times(40).with(:ruby, :bob, @s3_uri, @version_slug, @timeout).returns(@pc_data)
       Orchestrator::SPIClient.expects(:post_test_run).with(@uuid, 503, @message, @results)
 
       test_runner = TestRunner.new(@submission, @platform_connection, @settings)

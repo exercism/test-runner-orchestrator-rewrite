@@ -7,12 +7,12 @@ module Orchestrator
       application.add_language(:ruby, {"num_processors" => 0})
 
       timeout = 30002
-      cotnainer_slug = "some cotnainer_slug"
+      container_slug = "some container_slug"
 
       patch '/languages/ruby/settings', {
         settings: {
           timeout_ms: timeout,
-          container_slug: cotnainer_slug
+          version_slug: container_slug
         }
       }
 
@@ -20,7 +20,7 @@ module Orchestrator
 
       application.send(:borrow_language, :ruby) do |lang|
         assert_equal timeout, lang.settings.timeout_ms
-        assert_equal cotnainer_slug, lang.settings.container_slug
+        assert_equal container_slug, lang.settings.version_slug
       end
     end
   end

@@ -59,14 +59,14 @@ module Orchestrator
     def generate_test_run!
       log("Starting testing #{submission.num_errored_test_runs + 1}/#{num_attempts + 1}")
 
-      container_slug = submission.container_slug.presence ||
-                       language_settings.container_slug
+      version_slug = submission.version_slug.presence ||
+                       language_settings.version_slug
 
       data = platform_connection.run_tests(
         submission.language,
         submission.exercise,
         submission.s3_uri,
-        container_slug,
+        version_slug,
         language_settings.timeout_ms
       )
 

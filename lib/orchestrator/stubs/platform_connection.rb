@@ -18,7 +18,7 @@ module Orchestrator
     def open_socket
     end
 
-    def run_tests(track_slug, exercise_slug, s3_uri, container_slug, timeout_ms)
+    def run_tests(track_slug, exercise_slug, s3_uri, version_slug, timeout_ms)
       status_code = case track_slug
         when :ruby
           200

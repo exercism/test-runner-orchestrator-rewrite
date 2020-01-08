@@ -5,19 +5,19 @@ module Orchestrator
   class SPIClientTest < Minitest::Test
     def test_fetch_languages
       ruby_timeout = 3000
-      ruby_container_slug = "foobar"
+      ruby_version_slug = "foobar"
       js_timeout = 1000
-      js_container_slug = "barfood"
+      js_version_slug = "barfood"
 
       data = {
         'ruby' => {
           'timeout_ms' => ruby_timeout,
-          'container_slug' => ruby_container_slug,
+          'version_slug' => ruby_version_slug,
           'num_processors' => 3,
         },
         'javascript' => {
           'timeout_ms' => js_timeout,
-          'container_slug' => js_container_slug,
+          'version_slug' => js_version_slug,
           'num_processors' => 1,
         }
       }

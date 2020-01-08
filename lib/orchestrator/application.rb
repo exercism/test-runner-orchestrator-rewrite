@@ -28,7 +28,7 @@ module Orchestrator
     end
 
     def add_language(slug, settings)
-      language = Language.new(settings)
+      language = Language.new(slug, settings)
       language.scale_processors(settings['num_processors'].to_i)
 
       borrow_languages do |languages|
@@ -86,11 +86,19 @@ module Orchestrator
             queue_size: lang.queue_size,
             settings: {
               timeout_ms: lang.settings.timeout_ms,
-              container_slug: lang.settings.container_slug
+              version_slug: lang.settings.version_slug
             }
           }
         end
       end
+    end
+
+    def build_version(language:, version_slug:)
+      PlatformConnection.new.build_version(language, version_slug)
+    end
+
+    def deploy_versions(language:, version_slugs:)
+      PlatformConnection.new.deploy_versions(language, version_slugs)
     end
 
     private

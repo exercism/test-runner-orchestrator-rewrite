@@ -4,16 +4,15 @@ module Orchestrator
     ADDRESS = "tcp://analysis-router.exercism.io:5555"
 
     # TODO: Would this be safer as a constant?
-    def self.zmq_context
-      @zmq_context ||= Concurrent::MVar.new(ZMQ::Context.new(1))
-    end
+    # TODO - Yes it would!
+    ZMQ_CONTEXT = Concurrent::MVar.new(ZMQ::Context.new(1))
 
     def initialize(address: ADDRESS)
       @address = address
       @socket = open_socket
     end
 
-    def run_tests(track_slug, exercise_slug, s3_uri, container_slug, timeout_ms)
+    def run_tests(track_slug, exercise_slug, s3_uri, version_slug, timeout_ms)
       test_run_id = "test-#{Time.now.to_i}"
       params = {
         action: :test_solution,
@@ -21,12 +20,32 @@ module Orchestrator
         track_slug: track_slug,
         exercise_slug: exercise_slug,
         s3_uri: s3_uri,
-        container_version: container_slug
+        container_version: version_slug
       }
       params[:execution_timeout] = timeout_ms / 1000.0
       client_timeout = timeout_ms + 2000
 
       send_msg(params.to_json, client_timeout)
+    end
+
+    def build_version(language_slug, version_slug)
+      params = {
+        channel: :test_runners,
+        action: :build_container,
+        track_slug: language_slug,
+        git_reference: version_slug
+      }
+      result = send_msg(params.to_json, 1_000)
+    end
+
+    def deploy_versions(language_slug, version_slugs)
+      params = {
+        action: "update_container_versions",
+        channel: "test_runners",
+        track_slug: language_slug,
+        versions: version_slugs
+      }
+      result = send_msg(params.to_json, 1_000)
     end
 
     def send_msg(json, timeout_ms)
@@ -85,7 +104,7 @@ module Orchestrator
       # it must be set as an instance variable so that it
       # doesn't get garbage collected accidently.
 
-      socket = PlatformConnection.zmq_context.borrow do |context|
+      socket = ZMQ_CONTEXT.borrow do |context|
         context.socket(ZMQ::REQ)
       end
 
