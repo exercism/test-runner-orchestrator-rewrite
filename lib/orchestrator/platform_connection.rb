@@ -23,6 +23,7 @@ module Orchestrator
     end
 
     def deploy_versions(language_slug, version_slugs)
+      p version_slugs
       params = {
         action: "update_container_versions",
         channel: "test_runners",

@@ -98,6 +98,7 @@ module Orchestrator
     end
 
     def deploy_versions(language:, version_slugs:)
+      p version_slugs
       PlatformConnection.new.deploy_versions(language, version_slugs)
     end
 

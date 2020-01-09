@@ -59,6 +59,7 @@ class SubmissionsReceiverApp < Sinatra::Base
   end
 
   patch '/languages/:language_slug/versions/deploy' do
+    p params[:version_slugs]
     Orchestrator.application.deploy_versions(
       language: params[:language_slug],
       version_slugs: params[:version_slugs],
