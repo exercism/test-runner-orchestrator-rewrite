@@ -11,7 +11,7 @@ class SubmissionsReceiverApp < Sinatra::Base
 
   post '/submissions' do
     submission_uuid = params[:submission_uuid]
-    Logger.log_submission(submission_uuid, "Queuing")
+    Logger.log_submission(submission_uuid, "Queuing for params: #{params}")
 
     Orchestrator.application.enqueue_submission(
       submission_uuid,
