@@ -20,6 +20,17 @@ module Orchestrator
       assert_equal 1, application.queue_size(language: :javascript)
     end
 
+    def test_enqueue_submission_handles_missing_versions
+      application = Application.new
+      application.add_language(:ruby, {'num_processors' => 0})
+
+      Submission.expects(:new).with(1, :ruby, :bob, "asdasdsad").returns(mock(language: :ruby, uuid: 1))
+      application.enqueue_submission(1, 'ruby', 'bob', "asdasdsad")
+
+      Submission.expects(:new).with(2, :ruby, :bob, nil).returns(mock(language: :ruby, uuid: 2))
+      application.enqueue_submission(2, 'ruby', 'bob', nil)
+    end
+
     # This whole test is horrible in terms of checking
     # internals but it's also caught lots of integration
     # errors between all the pieces so I'm ok with it for now.

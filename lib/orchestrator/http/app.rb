@@ -17,6 +17,7 @@ class SubmissionsReceiverApp < Sinatra::Base
       submission_uuid,
       params[:language_slug],
       params[:exercise_slug],
+      params[:version_slug],
     )
 
     json received: :ok

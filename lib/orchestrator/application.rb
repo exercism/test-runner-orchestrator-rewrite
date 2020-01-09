@@ -21,6 +21,7 @@ module Orchestrator
           submission["uuid"],
           submission["language_slug"],
           submission["exercise_slug"]
+          # TODO - Add version slug
         )
       end
 
@@ -46,11 +47,13 @@ module Orchestrator
       true
     end
 
-    def enqueue_submission(uuid, language_slug, exercise_slug)
-      language_slug = language_slug.to_sym
-      exercise_slug = exercise_slug.to_sym
-
-      submission = Submission.new(uuid, language_slug, exercise_slug)
+    def enqueue_submission(uuid, language_slug, exercise_slug, version_slug = nil)
+      submission = Submission.new(
+        uuid,
+        language_slug.to_sym,
+        exercise_slug.to_sym,
+        version_slug
+      )
       borrow_language(submission.language) do |lang|
         lang.enqueue_submission(submission)
       end
