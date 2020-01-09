@@ -3,6 +3,7 @@ module Orchestrator
     attr_reader :status_code
 
     def initialize(submission_uuid, data)
+      @data = data
       @submission_uuid = submission_uuid
       @status_code = data&.fetch("status", nil)&.fetch("status_code", nil).to_i
       @status_message = data&.fetch("status", nil)&.fetch("message", nil)
