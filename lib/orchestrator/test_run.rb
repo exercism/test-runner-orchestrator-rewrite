@@ -16,6 +16,7 @@ module Orchestrator
         status_message,
         results
       )
+      Logger.log_submission(submission_uuid, "Failed with: #{data}") unless ran_successfully?
       Logger.log_submission(submission_uuid, "Reported back to SPI")
     end
 
