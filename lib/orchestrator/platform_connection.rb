@@ -12,22 +12,6 @@ module Orchestrator
       @socket = open_socket
     end
 
-    def run_tests(track_slug, exercise_slug, s3_uri, version_slug, timeout_ms)
-      test_run_id = "test-#{Time.now.to_i}"
-      params = {
-        action: :test_solution,
-        id: test_run_id,
-        track_slug: track_slug,
-        exercise_slug: exercise_slug,
-        s3_uri: s3_uri,
-        container_version: version_slug
-      }
-      params[:execution_timeout] = timeout_ms / 1000.0
-      client_timeout = timeout_ms + 2000
-
-      send_msg(params.to_json, client_timeout)
-    end
-
     def build_version(language_slug, version_slug)
       params = {
         channel: :test_runners,
@@ -43,9 +27,25 @@ module Orchestrator
         action: "update_container_versions",
         channel: "test_runners",
         track_slug: language_slug,
-        versions: version_slugs
+        versions: version_slugs.map{|s|"git-#{s}"}
       }
       result = send_msg(params.to_json, 1_000)
+    end
+
+    def run_tests(track_slug, exercise_slug, s3_uri, version_slug, timeout_ms)
+      test_run_id = "test-#{Time.now.to_i}"
+      params = {
+        action: :test_solution,
+        id: test_run_id,
+        track_slug: track_slug,
+        exercise_slug: exercise_slug,
+        s3_uri: s3_uri,
+        container_version: "git-#{version_slug}"
+      }
+      params[:execution_timeout] = timeout_ms / 1000.0
+      client_timeout = timeout_ms + 2000
+
+      send_msg(params.to_json, client_timeout)
     end
 
     def send_msg(json, timeout_ms)
