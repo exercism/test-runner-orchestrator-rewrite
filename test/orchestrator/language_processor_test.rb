@@ -3,8 +3,6 @@ require 'test_helper'
 module Orchestrator
   class LanguageProcessorTest < Minitest::Test
     def test_runs_and_exits
-      stub_platform_connection!
-
       queue = mock
 
       # TODO - Add a range of 9-11 here

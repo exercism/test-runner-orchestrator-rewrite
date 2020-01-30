@@ -79,7 +79,6 @@ module Orchestrator
         }
       } if response.nil?
 
-
       begin
         JSON.parse(response)
       rescue JSON::ParserError => e

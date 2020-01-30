@@ -8,8 +8,6 @@ module Orchestrator
 
     def run!
       Thread.new do
-        @platform_connection = PlatformConnection.new
-
         loop do
           submission_found = process_next_submission!
 
@@ -32,8 +30,7 @@ module Orchestrator
     end
 
     private
-    attr_reader :queue, :monitor, :test_runner, :settings,
-                :platform_connection, :should_exit
+    attr_reader :queue, :monitor, :test_runner, :settings, :should_exit
 
     def initialize(queue, monitor, settings)
       @queue = queue
@@ -46,7 +43,7 @@ module Orchestrator
       submission = queue.shift
       return false unless submission
 
-      handled, status = TestRunner.new(submission, platform_connection, settings).test!
+      handled, status = TestRunner.new(submission, PlatformConnection.new, settings).test!
       queue.push(submission) unless handled
       monitor.record!(submission.uuid, status)
 
