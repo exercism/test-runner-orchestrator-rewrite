@@ -55,7 +55,7 @@ module Orchestrator
       msg = ZMQ::Message.new
       msg.push(ZMQ::Frame.new(json))
 
-      puts "Sending msg"
+      puts "Sending msg: #{json}"
       socket.send_message(msg)
 
       # Get the response back from the runner
