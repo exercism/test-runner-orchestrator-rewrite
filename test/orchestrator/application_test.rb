@@ -175,11 +175,11 @@ module Orchestrator
           "status_code": 200,
           "message": "OK"
         },
-        "response": {
-          "status": {
-            "git-a2mwqw": true,
-            "git-uqw81d": false,
-            "git-kk8766": true
+        "response" => {
+          "status" => {
+            "git-a2mwqw" => true,
+            "git-uqw81d" => false,
+            "git-kk8766" => true
           }
         }
       }

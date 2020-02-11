@@ -106,7 +106,7 @@ module Orchestrator
 
     def deployed_versions(language: )
       deployed_versions = PlatformConnection.new.deployed_versions(language)
-      version_slugs = deployed_versions["response"]["status"]
+      version_slugs = deployed_versions["response"]["status"].
           select {|_, value| value }.
           keys.
           map { |s| s.tr("git-", "") }
