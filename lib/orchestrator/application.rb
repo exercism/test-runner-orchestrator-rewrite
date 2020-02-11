@@ -104,6 +104,16 @@ module Orchestrator
       PlatformConnection.new.deploy_versions(language, version_slugs)
     end
 
+    def deployed_versions(language: )
+      deployed_versions = PlatformConnection.new.deployed_versions(language)
+      version_slugs = deployed_versions[:response][:status].
+          select {|_, value| value }.
+          keys.
+          map { |s| s.to_s.tr("git-", "") }
+
+      { version_slugs: version_slugs }
+    end
+
     private
     attr_reader :languages
 
