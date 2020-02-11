@@ -168,6 +168,30 @@ module Orchestrator
       Application.new.deploy_versions(language: language_slug, version_slugs: version_slugs)
     end
 
+    def test_deployed_versions
+      language_slug = "python"
+      response = {
+        status: {
+          status_code: 200,
+          message: "OK"
+        },
+        response: {
+          status: {
+            "git-a2mwqw": true,
+            "git-uqw81d": false,
+            "git-kk8766": true
+          }
+        }
+      }
+      PlatformConnection.any_instance.expects(:deployed_versions).with(language_slug).returns(response)
+
+      deployed_versions = Application.new.deployed_versions(language: language_slug)
+      expected = {
+        version_slugs: ["a2mwqw", "kk8766"]
+      }
+      assert_equal expected, deployed_versions
+    end
+
   end
 end
 

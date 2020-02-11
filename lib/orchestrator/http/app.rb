@@ -67,4 +67,10 @@ class SubmissionsReceiverApp < Sinatra::Base
 
     json received: :ok
   end
+
+  get '/languages/:language_slug/versions/deployed' do
+    json Orchestrator.application.deployed_versions(
+      language: params[:language_slug]
+    )
+  end
 end

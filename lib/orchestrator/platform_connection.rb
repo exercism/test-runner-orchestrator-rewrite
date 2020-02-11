@@ -32,6 +32,15 @@ module Orchestrator
       result = send_msg(params.to_json, 1_000)
     end
 
+    def deployed_versions(language_slug)
+      params = {
+        action: "deployment_check",
+        channel: "test_runners",
+        track_slug: language_slug
+      }
+      result = send_msg(params.to_json, 1_000)
+    end
+
     def run_tests(track_slug, exercise_slug, s3_uri, version_slug, timeout_ms)
       test_run_id = "test-#{Time.now.to_i}"
       params = {
