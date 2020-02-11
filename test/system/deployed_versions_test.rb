@@ -3,10 +3,10 @@ require_relative 'base'
 module Orchestrator
   class DeployedVersionsTest < SystemBaseTestCase
     def test_deployed_versions
-      deployed_versions = {
+      platform_response = {
         version_slugs: ["a2mwqw", "kk8766"]
       }
-      Application.any_instance.expects(:deployed_versions).with(language: "ruby").returns(deployed_versions)
+      Application.any_instance.expects(:deployed_versions).with(language: "ruby").returns(platform_response)
 
       get "/languages/ruby/versions/deployed"
       assert_equal 200, last_response.status
@@ -20,4 +20,3 @@ module Orchestrator
     end
   end
 end
-

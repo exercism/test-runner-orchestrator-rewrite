@@ -175,13 +175,6 @@ module Orchestrator
           status_code: 200,
           message: "OK"
         },
-        context: {
-          timing: {
-            start_time: 1581423336032,
-            end_time: 1581423336032,
-            duration_milliseconds: 0
-          }
-        },
         response: {
           status: {
             "git-a2mwqw": true,
