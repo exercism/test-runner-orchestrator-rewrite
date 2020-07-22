@@ -28,7 +28,9 @@ module Orchestrator
     def no_workers_available?
       [
         PLATFORM_NO_WORKER_AVAILABLE,
-        CONTAINER_VERSION_UNAVALIABLE
+        CONTAINER_VERSION_UNAVALIABLE,
+        CONTAINER_INVOCATION_FAILURE,
+        CONTAINER_SETUP_FAILURE,
       ].include?(status_code)
     end
 
@@ -42,7 +44,6 @@ module Orchestrator
         PLATFORM_UNRECOGNISED_ACTION,
         PLATFORM_MALFORMED_REQUEST,
         WORKER_ERROR,
-        CONTAINER_INVOCATION_FAILURE,
         CONTAINER_OUTPUT_ERROR,
       ].include?(status_code)
     end
